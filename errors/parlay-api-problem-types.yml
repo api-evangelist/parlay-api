@@ -1,0 +1,49 @@
+generated: 2026-09-07
+method: derived
+source: openapi/parlay-api-openapi.json (422 validation responses) + https://parlay-api.com/limits (429/403 envelope documentation, HTTP 200)
+name: ParlayAPI Error Catalog
+description: Error surface derived from the live OpenAPI 3.1 contract and the
+  provider's /limits error-shape documentation, 2026-09-07. The API does not use
+  RFC 9457 application/problem+json; it returns a flat JSON envelope with error,
+  message, request_id and docs_url fields. 404s on unknown routes return
+  {"error":"NOT_FOUND","message":"No route ..."} (observed on well-known probes).
+format: vendor-json-envelope
+envelope_fields: [error, message, request_id, docs_url]
+problems:
+- status: 422
+  code: validation_error
+  title: Request validation failed
+  detail: Declared on 141 operations in the OpenAPI as HTTPValidationError; body
+    carries detail[] rows with loc, msg, type, input, ctx (FastAPI shape).
+  source: openapi
+- status: 429
+  code: rate_limit
+  title: Rate limit exceeded
+  detail: Sent with Retry-After header (seconds) and retry_after_seconds in the
+    body. Docs instruct clients to honor Retry-After with capped exponential
+    backoff; immediate retries waste credits and flag the account.
+  remediation: Sleep for Retry-After seconds before retrying.
+  source: https://parlay-api.com/limits
+- status: 403
+  code: credit_limit_exceeded
+  title: Monthly credit allowance exhausted
+  detail: Charged credits ran out for the billing period.
+  remediation: Upgrade tier or wait for the next billing period.
+  source: https://parlay-api.com/limits
+- status: 404
+  code: NOT_FOUND
+  title: No route
+  detail: Unknown paths return a JSON envelope, not an HTML shell.
+  source: probed 2026-09-07 (/.well-known/* misses)
+- status: 402
+  code: tier_gate_sse
+  title: Streaming not available on this tier
+  detail: Full-feed SSE (/v1/sse/odds/{sport_key}) returns 402 on Free/Starter/Pro;
+    the WebSocket equivalent closes with code 4001.
+  source: https://parlay-api.com/limits
+- status: 409
+  code: existing_account
+  title: Email already registered
+  detail: POST /v1/agent/signup with an existing email returns 409 pointing at
+    /v1/agent/magic-link.
+  source: https://parlay-api.com/llms.txt

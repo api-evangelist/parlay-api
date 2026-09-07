@@ -1,0 +1,33 @@
+generated: 2026-09-07
+method: searched
+source: https://parlay-api.com/llms.txt (HTTP 200), openapi/parlay-api-openapi.json (Sandbox tag), https://parlay-api.com/limits (HTTP 200)
+name: ParlayAPI Sandbox
+description: Keyless evaluation surfaces documented by the provider on 2026-09-07.
+  No separate sandbox host or test-key prefix scheme — the production API exposes
+  keyless sandbox and try endpoints that serve production-schema responses without
+  signup.
+environments:
+- name: production-sandbox
+  base_url: https://parlay-api.com
+  auth: none (keyless)
+  surfaces:
+  - path_family: /v1/sandbox/*
+    detail: Odds, props, arbitrage, EV, consensus, period markets, SSE and scores
+      in the production schema; 11 operations under the Sandbox tag in the
+      OpenAPI (e.g. sandbox_odds_v1_sandbox_sports__sport_key__odds_get).
+  - path_family: /v1/try/*
+    detail: Free no-auth demos (odds, arbitrage, EV, middles, verdict, SGP price),
+      0 credits, IP-rate-limited at 60 req/h.
+  - path_family: /v1/calc/*
+    detail: Kelly, edge, hedge and free-bet calculators, keyless.
+  - path_family: /live/api/*
+    detail: Public live dashboard API (sports, games, search).
+  - path: /v1/meta/source-quality
+    detail: Public source freshness/quality metadata, keyless.
+  - path: /diag
+    detail: In-browser connectivity check (8 tests) separating "ParlayAPI down"
+      from "your network is filtering us".
+test_credentials: none-published (keyless access is the sandbox; free tier key via
+  POST /v1/agent/signup returns a working key immediately)
+fixtures: Sandbox responses mirror production schema per llms.txt; no synthetic
+  fixture/trigger values (test cards etc.) are applicable to this domain.

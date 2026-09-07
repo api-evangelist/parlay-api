@@ -1,0 +1,139 @@
+generated: 2026-09-07
+method: derived
+source: mcp/parlay-api-mcp.yml + openapi/parlay-api-openapi.json (fetched 2026-09-07 from https://parlay-api.com/openapi.json)
+name: ParlayAPI MCP Tool Crosswalk
+description: Binding of the 22 parlayapi-mcp stdio tools to the REST operations in
+  the 224-operation OpenAPI 3.1 contract. Mapped by name/semantics from the tool
+  table in the provider's MCP README against operationIds grepped from the live
+  spec; the live MCP inputSchemas were not introspected (stdio-only server), so
+  confidence is set honestly per row.
+surfaces:
+  openapi: openapi/parlay-api-openapi.json
+  mcp:
+    transport: stdio
+    install: uvx parlayapi-mcp
+    gated: partially (9 of 22 tools keyless)
+  graphql: none
+coverage:
+  tools: 22
+  tools_mapped: 20
+  mcp_only: 2
+  rest_operations: 224
+crosswalk:
+- tool: parlayapi_signup
+  category: account
+  rest: [agent_signup_v1_agent_signup_post]
+  binding: direct
+  confidence: high
+  note: POST /v1/agent/signup; returns api_key, claim_url, upgrade_url.
+- tool: parlayapi_checkout_link
+  category: account
+  rest: [agent_checkout_link_v1_agent_checkout_link_post]
+  binding: direct
+  confidence: high
+- tool: parlayapi_magic_link
+  category: account
+  rest: [agent_magic_link_v1_agent_magic_link_post]
+  binding: direct
+  confidence: high
+- tool: parlayapi_get_pricing
+  category: metadata
+  rest: [credit_costs_v1_meta_credit_costs_get]
+  binding: semantic
+  confidence: medium
+  note: Pricing also served by /v1/meta/limits and GET /pricing with Accept
+    application/json.
+- tool: parlayapi_live_sports
+  category: live
+  rest: [live_sports_live_api_sports_get]
+  binding: direct
+  confidence: high
+- tool: parlayapi_live_search
+  category: live
+  rest: [live_search_live_api_search_get]
+  binding: direct
+  confidence: high
+- tool: parlayapi_live_command_center
+  category: live
+  rest: [live_games_live_api_games_get]
+  binding: semantic
+  confidence: medium
+  note: Public best-line preview from the /live dashboard API family.
+- tool: parlayapi_source_quality
+  category: metadata
+  rest: [source_quality_v1_meta_source_quality_get]
+  binding: direct
+  confidence: medium
+  note: operationId inferred from /v1/meta/source-quality path present in the spec.
+- tool: parlayapi_book_coverage
+  category: metadata
+  rest: [meta_book_coverage_v1_meta_book_coverage_get]
+  binding: semantic
+  confidence: medium
+  note: /v1/meta/book-coverage is named by /v1/meta/api-info sources block.
+- tool: parlayapi_list_sports
+  category: discovery
+  rest: [list_sports_v1_sports_get]
+  binding: direct
+  confidence: high
+- tool: parlayapi_get_odds
+  category: odds
+  rest: [get_odds_v1_sports__sport_key__odds_get]
+  binding: direct
+  confidence: high
+- tool: parlayapi_get_props
+  category: odds
+  rest: [get_props_v1_sports__sport_key__props_get]
+  binding: direct
+  confidence: high
+- tool: parlayapi_best_line
+  category: odds
+  rest: [best_line_alias_v1_sports__sport_key__best_line_get]
+  binding: semantic
+  confidence: medium
+- tool: parlayapi_verdict
+  category: analysis
+  rest: [verdict_v1_verdict_get]
+  binding: semantic
+  confidence: medium
+- tool: parlayapi_set_bettable_books
+  category: account
+  rest: [set_verdict_prefs_v1_verdict_prefs_post]
+  binding: direct
+  confidence: high
+  note: POST /v1/verdict/prefs stores bettable-book preferences.
+- tool: parlayapi_parlay_verdict
+  category: analysis
+  rest: [parlay_verdict_v1_parlay_verdict_post]
+  binding: direct
+  confidence: high
+- tool: parlayapi_find_arbitrage
+  category: analysis
+  rest: [find_arbitrage_v1_sports__sport_key__arbitrage_get]
+  binding: semantic
+  confidence: medium
+- tool: parlayapi_find_ev
+  category: analysis
+  rest: [find_positive_ev_v1_sports__sport_key__ev_get]
+  binding: semantic
+  confidence: medium
+- tool: parlayapi_consensus
+  category: analysis
+  rest: [get_consensus_v1_sports__sport_key__consensus_get]
+  binding: semantic
+  confidence: medium
+- tool: parlayapi_find_middles
+  category: analysis
+  rest: [find_middles_v1_sports__sport_key__middles_get]
+  binding: semantic
+  confidence: medium
+mcp_only:
+- tool: parlayapi_best_bets
+  reason: Composite — ranks +EV plays scoped to the user's bettable books and adds
+    edge alerts; combines /v1/sports/{sport_key}/ev with stored verdict prefs.
+- tool: parlayapi_account_info
+  reason: Account/tier/credits readout; backed by dashboard/account endpoints not
+    confidently mappable to a single public operationId by name.
+rest_only_note: The large majority of the 224 REST operations (historical archive,
+  sandbox, calculators, webhooks CRUD, alerts, SSE/streaming, metadata) have no
+  MCP tool; only the 22 tools above are exposed.

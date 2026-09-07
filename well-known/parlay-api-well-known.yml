@@ -1,0 +1,71 @@
+generated: 2026-09-07
+method: probed
+source: https://parlay-api.com/.well-known/, https://www.parlay-api.com/.well-known/, https://api.parlay-api.com/.well-known/
+name: ParlayAPI Well-Known Documents
+description: Probe of RFC 8615 well-known paths on every host the record knows,
+  2026-09-07. security.txt (RFC 9116) and ai-plugin.json are served on all three
+  hosts; OAuth/OIDC discovery and api-catalog return honest JSON 404s (no SPA
+  shell false positives). The provider additionally serves an agents.json
+  capability manifest and llms.txt at the site root (saved here and in llms/).
+hosts:
+- host: parlay-api.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: parlay-api-security.txt
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: parlay-api-ai-plugin.json
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: www.parlay-api.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: parlay-api-security.txt
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: parlay-api-ai-plugin.json
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+- host: api.parlay-api.com
+  documents:
+  - path: /.well-known/security.txt
+    status: 200
+    file: parlay-api-security.txt
+  - path: /.well-known/ai-plugin.json
+    status: 200
+    file: parlay-api-ai-plugin.json
+  - path: /.well-known/openid-configuration
+    status: 404
+  - path: /.well-known/oauth-authorization-server
+    status: 404
+  - path: /.well-known/api-catalog
+    status: 404
+  - path: /.well-known/agent-card.json
+    status: 404
+  - path: /.well-known/agent.json
+    status: 404
+root_documents:
+- path: /agents.json
+  status: 200
+  file: parlay-api-agents.json
+  note: agentsjson.org v1 capability manifest, served at the site root (not a
+    well-known path); lists auth, pricing, capabilities, MCP server, and data
+    sources.

@@ -1,0 +1,20 @@
+generated: 2026-09-07
+method: generated
+source: openapi/parlay-api-openapi.json
+name: ParlayAPI Agent Skills
+description: Packaged agent skills for ParlayAPI marquee flows, grounded in real
+  operationIds from the live OpenAPI 3.1 contract (verified 2026-09-07) plus the
+  provider's published conventions, error and webhook-signing rules.
+skills:
+- name: parlay-api-find-best-odds
+  file: parlay-api-find-best-odds.md
+  summary: Discover sport keys, pull live odds, and find the best price per
+    outcome across 30+ books.
+- name: parlay-api-arbitrage-scan
+  file: parlay-api-arbitrage-scan.md
+  summary: Scan for arbitrage, +EV and middles, rehearsing keyless and pricing
+    credits before spending.
+- name: parlay-api-agent-onboarding
+  file: parlay-api-agent-onboarding.md
+  summary: Programmatic free-key signup, webhook + prop-line alert wiring with
+    HMAC verification and reversal paths.

@@ -1,0 +1,69 @@
+generated: 2026-09-07
+method: probed
+source: https://parlay-api.com/pricing (Accept application/json, HTTP 200), https://parlay-api.com/v1/meta/limits (HTTP 200)
+name: ParlayAPI Plans and Pricing
+description: Six self-serve tiers read from the provider's machine-readable pricing
+  endpoints on 2026-09-07. Credits are the metering unit; each endpoint has a fixed
+  credit cost (see rate-limits artifact and GET /v1/meta/credit-costs). Annual
+  pricing carries a 10% discount (15% on Enterprise) per the /limits page.
+plan_count: 6
+currency: USD
+billing_period: monthly
+plans:
+- name: Free
+  price: 0
+  included_credits: 1000
+  rate_limit_per_min: 30
+  burst_per_sec: 1
+  historical_hours: 48
+  websocket: false
+  sse: false
+  support: Community
+  note: No credit card required.
+- name: Starter
+  price: 5
+  included_credits: 20000
+  rate_limit: none
+  burst_per_sec: 5
+  historical_hours: 168
+  websocket: false
+  sse: false
+  support: Email
+- name: Pro
+  price: 20
+  included_credits: 100000
+  rate_limit: none
+  burst_per_sec: 10
+  historical_hours: 720
+  websocket: false
+  sse: false
+  support: Email
+- name: Business
+  price: 40
+  included_credits: 1000000
+  rate_limit: none
+  burst_per_sec: 20
+  historical_hours: 2160
+  websocket: true
+  sse: true
+  support: Email, 1-day SLA
+- name: Enterprise
+  price: 100
+  included_credits: 5000000
+  rate_limit: none
+  burst_per_sec: 50
+  historical_hours: 8760
+  websocket: true
+  sse: true
+  support: Email + Slack, 4-hr SLA
+- name: Scale
+  price: 200
+  included_credits: 50000000
+  rate_limit: none
+  burst_per_sec: 100
+  historical_hours: 87600
+  websocket: true
+  sse: true
+  support: Email + Slack, 1-hr SLA
+overage: Credit exhaustion returns HTTP 403 error credit_limit_exceeded; upgrade
+  tier or wait for the next billing period (no metered overage documented).

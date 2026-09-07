@@ -1,0 +1,34 @@
+generated: '2026-09-07'
+method: derived
+source: openapi/parlay-api-openapi.json
+summary:
+  types:
+  - apiKey
+  - http
+  api_key_in:
+  - header
+  - query
+schemes:
+- name: apiKeyHeader
+  type: apiKey
+  in: header
+  parameter: X-API-Key
+  description: API key passed in the X-API-Key header. Recommended.
+  sources:
+  - openapi/parlay-api-openapi.json
+- name: apiKeyQuery
+  type: apiKey
+  in: query
+  parameter: apiKey
+  description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and
+    webhooks where header control is limited. Equivalent to X-API-Key.
+  sources:
+  - openapi/parlay-api-openapi.json
+- name: bearerAuth
+  type: http
+  scheme: bearer
+  bearerFormat: APIKey
+  description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for
+    compatibility with auth libraries that expect bearer tokens.'
+  sources:
+  - openapi/parlay-api-openapi.json

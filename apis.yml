@@ -1,7 +1,14 @@
 name: ParlayAPI
-description: Sports odds REST API for personal and internal research projects. Free tier 1,000 credits/month; public
-  display and redistribution rights are not included.
+description: Real-time sports odds aggregation API covering 30+ sportsbooks and
+  sources — regulated US books, DFS apps, betting exchanges, and prediction
+  markets (Kalshi, Polymarket) — across 92 sport keys, with player props,
+  historical closing lines from 2005, arbitrage/EV/middles scanning, devig and
+  parlay calculators, WebSocket/SSE streaming, webhooks, an official MCP server,
+  and programmatic agent signup. Drop-in replacement for the-odds-api v4. Free
+  tier 1,000 credits/month; public display and redistribution rights are not
+  included.
 url: https://raw.githubusercontent.com/api-evangelist/parlay-api/refs/heads/main/apis.yml
+image: https://parlay-api.com/static/logo.png
 created: '2026-09-07'
 modified: '2026-09-07'
 specificationVersion: '0.21'
@@ -10,27 +17,114 @@ tags:
 - Odds
 - Betting Data
 - Sports Data
+- Prediction Markets
+- Player Props
+- Arbitrage
+- Streaming
 apis:
 - name: ParlayAPI
+  description: REST API for live and historical sports odds, player props,
+    prediction-market prices, arbitrage/EV scanning, and account webhooks, with
+    keyless sandbox and try surfaces, credit-based metering, and an AsyncAPI-
+    described WebSocket/SSE streaming layer.
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
   - Sports
   - Odds
+  - Player Props
+  - Prediction Markets
   properties:
   - type: OpenAPI
-    url: https://parlay-api.com/openapi.json
+    url: openapi/parlay-api-openapi.json
   - type: Documentation
     url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
   - type: LLMsTxt
     url: https://parlay-api.com/llms.txt
   - type: Pricing
     url: https://parlay-api.com/pricing
   - type: X-MCPPackage
     url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: MCPServer
+    url: mcp/parlay-api-mcp.yml
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: Overlay
+    url: overlays/parlay-api-openapi-overlay.yaml
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
 maintainers:
 - FN: ParlayAPI
+  email: support@parlay-api.com
 x-source:
   via: api-search/inbox#22 (JacobiusMakes)
   fetched: '2026-09-07'
   note: Every pointer probed before writing; controls discriminate.
+common:
+- type: Website
+  url: https://parlay-api.com
+- type: VulnerabilityDisclosure
+  url: security/parlay-api-vulnerability-disclosure.yml
+- type: Security
+  url: security/parlay-api-vulnerability-disclosure.yml
+- type: DomainSecurity
+  url: security/parlay-api-domain-security.yml
+- type: Authentication
+  url: authentication/parlay-api-authentication.yml
+- type: Packages
+  url: packages/parlay-api-packages.yml
+- type: SDKs
+  url: packages/parlay-api-packages.yml
+- type: WellKnown
+  url: well-known/parlay-api-well-known.yml
+- type: SecurityTxt
+  url: well-known/parlay-api-security.txt
+- type: Conformance
+  url: conformance/parlay-api-conformance.yml
+- type: Conventions
+  url: conventions/parlay-api-conventions.yml
+- type: Idempotency
+  url: conventions/parlay-api-conventions.yml
+- type: Lifecycle
+  url: lifecycle/parlay-api-lifecycle.yml
+- type: StatusPage
+  url: https://parlay-api.com/status
+- type: ChangeLog
+  url: changelog/parlay-api-changelog.yml
+- type: Plans
+  url: plans/parlay-api-plans-pricing.yml
+- type: Components
+  url: components/parlay-api-components.yml
+- type: AgentSkill
+  url: skills/_index.yml
+- type: Support
+  url: https://parlay-api.com/support
+- type: Blog
+  url: https://parlay-api.com/blog
+- type: SignUp
+  url: https://parlay-api.com/signup
+- type: TermsOfService
+  url: https://parlay-api.com/terms
+- type: PrivacyPolicy
+  url: https://parlay-api.com/privacy
+- type: GitHubOrganization
+  url: https://github.com/JacobiusMakes
+x-enrichment:
+  date: '2026-09-07'
+  status: enriched
+  artifacts_added: 31
+  pass: local-v3

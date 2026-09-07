@@ -1,0 +1,71 @@
+generated: 2026-09-07
+method: derived
+source: openapi/parlay-api-openapi.json (components.schemas + path structure), asyncapi/parlay-api-webhooks.json
+name: ParlayAPI Data Model
+description: Entity-relationship graph derived from the live OpenAPI 3.1 contract
+  on 2026-09-07. The contract declares mostly request-body schemas (FastAPI), so
+  response entities are derived from path structure and id-reference fields; only
+  relationships actually visible in the contract are recorded.
+entities:
+- name: Sport
+  id_field: sport_key
+  detail: 92 sport keys; listed by list_sports_v1_sports_get.
+- name: Bookmaker
+  id_field: key
+  detail: 30+ sources; listed by list_bookmakers_v1_bookmakers_get, detail and
+    freshness sub-resources per key.
+- name: Event
+  id_field: event_id
+  detail: Games/fixtures; odds addressed per event via
+    get_event_odds_v1_sports__sport_key__events__event_id__odds_get.
+- name: Market
+  id_field: market_key
+  detail: h2h, spreads, totals, player_* props, futures; listed by
+    list_markets_v1_markets_get.
+- name: Webhook
+  id_field: webhook_id
+  schema: WebhookCreate/WebhookPatch (url, events[], sport_filter, is_active)
+  detail: CRUD under /v1/webhooks; has deliveries and an HMAC secret.
+- name: WebhookDelivery
+  detail: Listed by list_webhook_deliveries_v1_webhooks__webhook_id__deliveries_get.
+- name: PropLineAlert
+  id_field: alert_id
+  schema: AlertCreate/AlertPatch (sport_key, player_name, market_key,
+    threshold_line, webhook_id, book, direction, cooldown_seconds, expires_at,
+    event_id)
+- name: Account
+  detail: Created via agent signup or /signup; owns API keys, tier, credits,
+    verdict preferences, webhooks, alerts, closing-line imports.
+relationships:
+- from: Event
+  to: Sport
+  type: belongs_to
+  via: sport_key (path nesting /v1/sports/{sport_key}/events/{event_id})
+- from: PropLineAlert
+  to: Webhook
+  type: belongs_to
+  via: webhook_id (AlertCreate.webhook_id)
+- from: PropLineAlert
+  to: Sport
+  type: belongs_to
+  via: sport_key (AlertCreate.sport_key)
+- from: PropLineAlert
+  to: Event
+  type: belongs_to
+  via: event_id (AlertCreate.event_id, optional)
+- from: Webhook
+  to: WebhookDelivery
+  type: has_many
+  via: webhook_id (path nesting /v1/webhooks/{webhook_id}/deliveries)
+- from: Webhook
+  to: Sport
+  type: has_many
+  via: sport_filter (WebhookCreate.sport_filter[])
+- from: Account
+  to: Webhook
+  type: has_many
+  via: API-key scoping (webhooks are account-scoped resources)
+- from: Account
+  to: PropLineAlert
+  type: has_many
+  via: API-key scoping

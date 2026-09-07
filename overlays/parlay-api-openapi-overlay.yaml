@@ -1,0 +1,39 @@
+overlay: 1.0.0
+info:
+  title: API Evangelist enrichment overlay for the ParlayAPI OpenAPI
+  version: 1.0.0
+x-provenance:
+  generated: 2026-09-07
+  method: generated
+  source: openapi/parlay-api-openapi.json (fetched 2026-09-07 from https://parlay-api.com/openapi.json)
+  note: Non-destructive catalog enhancements; the original spec is never mutated.
+extends: ./../openapi/parlay-api-openapi.json
+actions:
+- target: $.info
+  update:
+    x-api-evangelist:
+      repo: https://github.com/api-evangelist/parlay-api
+      artifacts:
+        authentication: authentication/parlay-api-authentication.yml
+        conventions: conventions/parlay-api-conventions.yml
+        errors: errors/parlay-api-problem-types.yml
+        rate-limits: rate-limits/parlay-api-rate-limits.yml
+        webhooks: asyncapi/parlay-api-webhooks.json
+        asyncapi: asyncapi/parlay-api-asyncapi.json
+- target: $.info
+  update:
+    x-error-envelope:
+      shape: '{"error","message","request_id","docs_url"}'
+      note: Not RFC 9457; 422 validation uses FastAPI HTTPValidationError.
+- target: $.info
+  update:
+    x-rate-limit-headers:
+    - X-Credits-Cost
+    - X-Credits-Remaining
+    - X-Rate-Limit-Remaining
+    - X-Rate-Limit-Reset
+    - Retry-After
+- target: $.externalDocs
+  update:
+    description: Rate limits and credit costs reference
+    url: https://parlay-api.com/limits

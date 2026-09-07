@@ -1,0 +1,103 @@
+generated: 2026-09-07
+method: searched
+source: https://github.com/JacobiusMakes/parlay-api-mcp, https://pypi.org/project/parlayapi-mcp/, https://parlay-api.com/mcp, https://parlay-api.com/llms.txt
+name: ParlayAPI MCP Server
+description: Official first-party MCP server (parlayapi-mcp) exposing sports odds,
+  props, prediction-market data, live previews, source-quality proof, and agent
+  signup as 22 tools. Local stdio transport only — no hosted/remote endpoint is
+  published. Distributed on PyPI, as a Claude Desktop .mcpb bundle, and registered
+  in the official MCP registry as io.github.JacobiusMakes/parlayapi. Nine tools
+  work keyless (signup, checkout-link, magic-link, pricing, live previews, source
+  quality, coverage); the rest need a PARLAYAPI_KEY API key.
+status: official
+deployment:
+  mode: local-stdio
+  install: uvx parlayapi-mcp
+  package: https://pypi.org/project/parlayapi-mcp/
+  auth: api-key
+  verified: searched
+registry: io.github.JacobiusMakes/parlayapi
+repository: https://github.com/JacobiusMakes/parlay-api-mcp
+version: 0.3.6
+published: '2026-09-07'
+transport: stdio
+environment:
+- name: PARLAYAPI_KEY
+  required: false
+  note: Optional; keyless mode still serves signup, pricing, live preview,
+    source-quality and coverage tools. PARLAY_API_KEY also accepted.
+- name: PARLAYAPI_BASE_URL
+  required: false
+  note: Override for local development.
+resources:
+- uri: parlayapi://docs/quickstart
+  description: Python and JS code samples.
+tools:
+- name: parlayapi_signup
+  auth: none
+  description: Create a free-tier account, return API key + claim URL + upgrade URL
+- name: parlayapi_checkout_link
+  auth: none
+  description: Stripe upgrade URL for any tier
+- name: parlayapi_magic_link
+  auth: none
+  description: Email a passwordless login link
+- name: parlayapi_get_pricing
+  auth: none
+  description: Current public pricing and credit tiers
+- name: parlayapi_live_sports
+  auth: none
+  description: Active live sports, event counts, and book counts
+- name: parlayapi_live_search
+  auth: none
+  description: Search live teams, players, and sport keys
+- name: parlayapi_live_command_center
+  auth: none
+  description: Public best-line preview from /live
+- name: parlayapi_source_quality
+  auth: none
+  description: Public source freshness and quality metadata
+- name: parlayapi_book_coverage
+  auth: none
+  description: Public per-book five-gate coverage proof
+- name: parlayapi_list_sports
+  auth: api-key
+  description: All available sport keys
+- name: parlayapi_get_odds
+  auth: api-key
+  description: Game-level odds (h2h, spreads, totals) for a sport
+- name: parlayapi_get_props
+  auth: api-key
+  description: Player prop odds for a sport
+- name: parlayapi_best_line
+  auth: api-key
+  description: Best price per outcome across bookmakers
+- name: parlayapi_verdict
+  auth: api-key
+  description: One-call "should I bet this?" fair price vs market, best bettable
+    book, plain-English BET/PASS call
+- name: parlayapi_set_bettable_books
+  auth: api-key
+  description: Remember the user's region/books so verdicts skip books they can't use
+- name: parlayapi_parlay_verdict
+  auth: api-key
+  description: Grade a multi-leg parlay — combined fair price, best book, EV,
+    weakest leg, correlation warnings, payout
+- name: parlayapi_best_bets
+  auth: api-key
+  description: Ranked +EV plays for a sport, scoped to bettable books, plus edge alerts
+- name: parlayapi_account_info
+  auth: api-key
+  description: Tier, credits remaining, billing period
+- name: parlayapi_find_arbitrage
+  auth: api-key
+  description: Cross-book arbitrage candidates, 3-way markets included
+- name: parlayapi_find_ev
+  auth: api-key
+  description: Positive-EV bets vs a sharp book's no-vig fair line
+- name: parlayapi_consensus
+  auth: api-key
+  description: Consensus (average) odds across all bookmakers per market
+- name: parlayapi_find_middles
+  auth: api-key
+  description: Cross-book middle opportunities

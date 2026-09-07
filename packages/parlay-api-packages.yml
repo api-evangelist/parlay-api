@@ -1,0 +1,44 @@
+generated: 2026-09-07
+method: searched
+source: https://pypi.org/pypi/parlay-api/json, https://pypi.org/pypi/parlayapi-mcp/json, https://parlay-api.com/v1/meta/sdks, https://parlay-api.com/llms.txt
+name: ParlayAPI Packages
+description: First-party client packages for ParlayAPI. Registry metadata read from
+  PyPI JSON endpoints on 2026-09-07. The provider also documents openapi-generator
+  recipes for generating SDKs in other languages from /openapi.json (not packages,
+  not listed here).
+packages:
+- name: parlay-api
+  registry: pypi
+  url: https://pypi.org/project/parlay-api/
+  language: Python
+  official: true
+  version: 0.3.3
+  published: '2026-09-05'
+  install: pip install parlay-api
+  repository: https://github.com/JacobiusMakes/parlay-api-python
+  license: MIT
+  note: Official Python SDK with devig and WebSocket examples; homepage and docs
+    point at parlay-api.com, author email jacob@parlay-api.com domain family.
+- name: parlayapi-mcp
+  registry: pypi
+  url: https://pypi.org/project/parlayapi-mcp/
+  language: Python
+  official: true
+  version: 0.3.6
+  published: '2026-09-07'
+  install: pip install parlayapi-mcp
+  repository: https://github.com/JacobiusMakes/parlay-api-mcp
+  license: MIT
+  note: Official MCP server package (stdio). Also distributed as a Claude Desktop
+    .mcpb bundle from the GitHub release page (parlayapi-mcp-0.3.6-directory.mcpb).
+- name: parlayapi-mcp (Claude Desktop bundle)
+  registry: github-release
+  url: https://github.com/JacobiusMakes/parlay-api-mcp/releases/download/v0.3.6/parlayapi-mcp-0.3.6-directory.mcpb
+  language: Python
+  official: true
+  version: 0.3.6
+  published: '2026-09-07'
+  install: Download the .mcpb and open it in Claude Desktop
+  repository: https://github.com/JacobiusMakes/parlay-api-mcp
+  note: Version pinned in the release asset filename; same code as the PyPI
+    parlayapi-mcp package.

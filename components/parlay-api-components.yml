@@ -1,0 +1,26 @@
+generated: 2026-09-07
+method: searched
+source: https://parlay-api.com/llms.txt (HTTP 200), https://parlay-api.com/widget
+name: ParlayAPI Embeddable Components
+description: Client-side embeddable surfaces documented by the provider on
+  2026-09-07. Distinct from the Python SDK (see packages/).
+components:
+- family: Odds widget
+  name: Live moneyline table widget
+  url: https://parlay-api.com/widget
+  loader: One script tag; keyless
+  detail: Renders a live moneyline table (up to 4 major US books, cached about a
+    minute) on any site. The visible "Live odds by ParlayAPI" attribution link is
+    the license. Backing endpoint widget_odds_v1_widget_odds_get in the OpenAPI.
+- family: Calculators
+  name: Free betting calculators
+  url: https://parlay-api.com/tools
+  loader: Hosted pages, client-side
+  detail: Parlay, odds converter, no-vig/devig, hold, Kelly, arbitrage and EV
+    calculators; all client-side with the formulas shown.
+- family: Diagnostics
+  name: Connectivity check
+  url: https://parlay-api.com/diag
+  loader: Hosted page, in-browser
+  detail: Runs 8 in-browser tests (TLS reachability, REST responses, JSON parse,
+    static-asset fetch) to separate provider downtime from local network filtering.

@@ -1,0 +1,58 @@
+generated: 2026-09-07
+method: derived
+source: openapi/parlay-api-openapi.json, asyncapi/parlay-api-asyncapi.json, https://parlay-api.com/limits, https://parlay-api.com/.well-known/security.txt, https://parlay-api.com/llms.txt
+name: ParlayAPI Conformance
+description: Standards posture derived from the provider's published contracts and
+  docs on 2026-09-07. Sports-odds aggregation has no dominant domain contract
+  standard; the closest signature here is de facto the-odds-api v4 wire
+  compatibility, recorded as a compatibility profile rather than an invented
+  standard conformance.
+conformance:
+- id: openapi-3.1
+  conforms: true
+  evidence: https://parlay-api.com/openapi.json declares openapi 3.1.0 with 206
+    paths; saved at openapi/parlay-api-openapi.json.
+- id: asyncapi-3.0
+  conforms: true
+  evidence: https://parlay-api.com/v1/asyncapi.json declares asyncapi 3.0.0 with 5
+    channels (WebSocket + SSE); saved at asyncapi/parlay-api-asyncapi.json.
+- id: rfc9116-security-txt
+  conforms: true
+  evidence: https://parlay-api.com/.well-known/security.txt (HTTP 200) with
+    Contact, Expires, Canonical, Policy fields.
+- id: rfc9457
+  conforms: false
+  evidence: Error responses use a vendor JSON envelope ({error, message,
+    request_id, docs_url}), not application/problem+json; see
+    errors/parlay-api-problem-types.yml.
+- id: oauth2
+  conforms: false
+  evidence: API-key auth only (X-API-Key / ?apiKey= / Bearer); no oauth2
+    securitySchemes in the contract and no /.well-known/oauth-authorization-server
+    (404 probed 2026-09-07).
+- id: pagination
+  conforms: true
+  evidence: limit/offset parameters on list endpoints plus documented time-window
+    parameters (dateFrom/dateTo, commenceTimeFrom/commenceTimeTo) in the OpenAPI.
+- id: idempotency
+  conforms: false
+  evidence: No Idempotency-Key mechanism; only two operations document
+    operation-level idempotency (see conventions idempotency.coverage partial).
+- id: llms-txt
+  conforms: true
+  evidence: https://parlay-api.com/llms.txt (HTTP 200), llmstxt.org format with
+    curated sections; saved at llms/parlay-api-llms.txt.
+- id: mcp
+  conforms: true
+  evidence: Official parlayapi-mcp stdio server on PyPI, registered as
+    io.github.JacobiusMakes/parlayapi in the MCP registry.
+- id: the-odds-api-v4-compat
+  conforms: true
+  evidence: llms.txt and /migrate-from-the-odds-api document drop-in wire
+    compatibility with the-odds-api v4 (same endpoints, params, response format;
+    ?apiKey= supported) — a de facto market compatibility profile, not a formal
+    standards-body contract.
+- id: rfc8594-sunset
+  conforms: false
+  evidence: No Sunset/Deprecation headers documented anywhere in the contract or
+    docs (grep of openapi.json, /limits, llms.txt on 2026-09-07).

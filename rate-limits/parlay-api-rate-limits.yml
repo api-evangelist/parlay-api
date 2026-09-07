@@ -1,0 +1,81 @@
+generated: 2026-09-07
+method: searched
+source: https://parlay-api.com/limits (HTTP 200), https://parlay-api.com/v1/meta/limits (HTTP 200), https://parlay-api.com/v1/meta/credit-costs (HTTP 200)
+name: ParlayAPI Rate Limits
+description: Published rate limits and credit costs, read from the /limits
+  reference page and the machine-readable /v1/meta/limits and
+  /v1/meta/credit-costs endpoints on 2026-09-07. Metering is credit-based; only
+  the Free tier carries a request rate limit, while paid tiers are governed by
+  burst caps and monthly credit allowances.
+limit_count: 8
+limits:
+- scope: per-key (Free tier)
+  window: 1 minute
+  limit: 30
+  burst: 1/sec
+- scope: per-key (Starter)
+  window: none
+  limit: no rate limit
+  burst: 5/sec
+- scope: per-key (Pro)
+  window: none
+  limit: no rate limit
+  burst: 10/sec
+- scope: per-key (Business)
+  window: none
+  limit: no rate limit
+  burst: 20/sec
+- scope: per-key (Enterprise)
+  window: none
+  limit: no rate limit
+  burst: 50/sec
+- scope: per-key (Scale)
+  window: none
+  limit: no rate limit
+  burst: 100/sec
+- scope: per-IP (free /v1/try/* and /v1/meta/* endpoints)
+  window: 1 hour
+  limit: 60
+  note: Applies regardless of tier; these endpoints cost 0 credits.
+- scope: per-IP (POST /v1/agent/signup)
+  window: 1 hour
+  limit: 5
+  note: Agent programmatic signups.
+credit_costs:
+  unit: credits
+  charged_on: success
+  examples:
+  - endpoint: /v1/sports/{sport}/odds?markets=h2h
+    cost: 1
+  - endpoint: /v1/sports/{sport}/odds?markets=h2h,spreads,totals
+    cost: 2
+  - endpoint: /v1/sports/{sport}/odds?markets=player_*
+    cost: 5
+  - endpoint: /v1/sports/{sport}/arbitrage
+    cost: 3
+  - endpoint: /v1/sgp/price
+    cost: 10 + 5/leg (min 15)
+  - endpoint: /v1/meta/* and /v1/try/*
+    cost: 0
+  full_reference: https://parlay-api.com/v1/meta/credit-costs
+response_headers:
+- name: X-Credits-Cost
+  meaning: Credits charged for this request
+- name: X-Credits-Remaining
+  meaning: Credits remaining in the monthly allowance
+- name: X-Rate-Limit-Remaining
+  meaning: Requests remaining in the current minute window
+- name: X-Rate-Limit-Reset
+  meaning: Unix timestamp when the window resets
+- name: X-Request-ID
+  meaning: Per-request UUID for support tickets
+- name: Retry-After
+  meaning: Seconds to wait, sent on 429
+exhaustion:
+  rate_limit:
+    status: 429
+    envelope: '{"error":"rate_limit","message":"...","retry_after_seconds":60,"request_id":"...","docs_url":"https://parlay-api.com/limits"}'
+    retry_header: Retry-After (seconds)
+  credit_limit:
+    status: 403
+    envelope: '{"error":"credit_limit_exceeded","message":"Monthly credit allowance exhausted..."}'

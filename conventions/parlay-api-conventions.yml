@@ -1,0 +1,95 @@
+generated: 2026-09-07
+method: searched
+source: https://parlay-api.com/limits (HTTP 200), https://parlay-api.com/llms.txt (HTTP 200), https://parlay-api.com/v1/meta/webhooks (HTTP 200), openapi/parlay-api-openapi.json
+name: ParlayAPI Conventions
+description: Cross-cutting request/response semantics read from the provider's
+  docs and the live OpenAPI 3.1 contract on 2026-09-07.
+auth:
+  style: API key
+  schemes:
+  - X-API-Key header (recommended)
+  - '?apiKey= query parameter (the-odds-api compatibility)'
+  - 'Authorization: Bearer <key>'
+  detail: See authentication/parlay-api-authentication.yml. No OAuth; agent
+    programmatic signup at POST /v1/agent/signup returns a working key.
+idempotency:
+  coverage: partial
+  scope:
+  - agent_signup_v1_agent_signup_post
+  - import_customer_closing_lines_v1_historical_closing_lines_import_post
+  detail: No Idempotency-Key header mechanism exists. Two operations document
+    operation-level idempotency in the contract — agent signup is idempotent on
+    email (existing account returns a login URL, never the key), and the
+    historical closing-lines import is a no-op on duplicate rows (ON CONFLICT DO
+    NOTHING). All other writes (webhooks CRUD, alerts, billing, verdict prefs)
+    document no replay protection.
+pagination:
+  style: limit/offset query parameters on list endpoints; time-window parameters
+    (dateFrom/dateTo, hours, days) on odds/historical endpoints.
+  params: [limit, offset, dateFrom, dateTo, commenceTimeFrom, commenceTimeTo]
+  response_fields: none documented (no cursor envelope).
+metering:
+  unit: credits
+  headers: [X-Credits-Cost, X-Credits-Remaining]
+  quote: POST /v1/meta/quote and /v1/meta/batch-quote price a call before making it.
+request_id:
+  header: X-Request-ID
+  detail: Per-request UUID on every authenticated response; include in support
+    tickets. Also echoed in error envelopes as request_id.
+versioning:
+  style: /v1 path prefix; service version 3.2.0 in info.version.
+error_envelope:
+  shape: '{"error": "<code>", "message": "...", "request_id": "...", "docs_url": "..."}'
+  validation: 422 FastAPI HTTPValidationError with detail[] rows.
+  problem_json: false
+rate_limit_signaling:
+  headers: [X-Rate-Limit-Remaining, X-Rate-Limit-Reset, Retry-After]
+  exhaustion: 429 rate_limit (with Retry-After seconds), 403 credit_limit_exceeded.
+  see: rate-limits/parlay-api-rate-limits.yml
+streaming:
+  websocket: wss://parlay-api.com/ws/odds/{sportKey} (Business tier and up; WS
+    close code 4001 on lower tiers)
+  sse: /v1/sse/odds/{sport_key}, /v1/sse/hot/{sport_key}, /v1/odds-drop/{sport_key},
+    /v1/sports/{sport_key}/live/sse (402 on ungated tiers for the full feed)
+  contract: asyncapi/parlay-api-asyncapi.json (AsyncAPI 3.0.0, served at
+    /v1/asyncapi.json)
+webhooks:
+  signing: HMAC-SHA256, X-Parlay-Signature header, t=<ts>,v1=<hex> format with a
+    5-minute replay window; secrets whsec_-prefixed, rotated via
+    POST /v1/webhooks/{webhook_id}/rotate-secret.
+  retry: 3 attempts (immediate, +30s, +5min); auto-disable after 5 consecutive
+    failures with owner email.
+  tier_gate: Pro and above.
+  catalog: asyncapi/parlay-api-webhooks.json (served at /v1/meta/webhooks)
+reversibility:
+  posture: mostly-read-only
+  detail: The data surface (odds, props, historical, calculators) is read-only —
+    reversibility, dry-run and idempotency are na for it. The account-scoped
+    write surfaces are all reversible by inverse CRUD or documented cancel paths.
+  writes:
+  - surface: webhooks
+    reversal: delete_webhook_v1_webhooks__webhook_id__delete (delete),
+      update_webhook_v1_webhooks__webhook_id__patch (disable via is_active)
+    window: none stated
+    grade: documented
+  - surface: prop-line alerts
+    reversal: delete_prop_line_alert_v1_alerts_prop_line__alert_id__delete,
+      patch_prop_line_alert_v1_alerts_prop_line__alert_id__patch (enabled=false)
+    window: none stated
+    grade: documented
+  - surface: subscription billing
+    reversal: cancel_subscription_route_billing_subscription_cancel_post
+    window: none stated
+    grade: documented
+  - surface: historical closing-lines imports
+    reversal: delete_customer_closing_imports_v1_historical_closing_lines_import_delete
+    window: none stated
+    grade: documented
+  - surface: agent signup
+    reversal: none documented (no account-deletion operation in the contract)
+    window: none stated
+    grade: none
+dry_run:
+  detail: POST /v1/meta/quote and /v1/meta/batch-quote rehearse the credit cost of
+    a call without executing it; POST /v1/webhooks/{webhook_id}/test fires a test
+    delivery. No general dry-run flag on writes.

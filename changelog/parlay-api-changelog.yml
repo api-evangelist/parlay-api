@@ -1,0 +1,25 @@
+generated: 2026-09-07
+method: searched
+source: https://parlay-api.com/changelog (HTTP 200)
+name: ParlayAPI Changelog
+description: Dated public deploy log — features, parser fixes, source additions and
+  behavior changes, updated on deploy, with RSS at /changelog.rss. Entries below
+  are the recent window read on 2026-09-07; entries are typed (feature/fix) and
+  tagged rather than semver-numbered.
+scheme: dated deploy log (no semver per entry; service version 3.2.0)
+current_version: 3.2.0
+feed: https://parlay-api.com/changelog.rss
+entries:
+- date: '2026-09-05'
+  type: fix
+  breaking: false
+  highlights: /v1/status now quotes one per-source health verdict across all
+    blocks (healthy/sla_state become source-level properties, rows add
+    row_healthy/row_sla_state, data_freshness gains suppressed_sources,
+    retired_sources, sources_without_rows). No field removed or renamed.
+- date: '2026-07-23'
+  type: feature
+  breaking: false
+  highlights: Moneyline (h2h) consensus — /v1/sports/{sport_key}/consensus now
+    accepts markets=h2h for per-side consensus price and implied probability
+    across books.

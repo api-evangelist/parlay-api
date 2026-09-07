@@ -1,0 +1,36 @@
+generated: 2026-09-07
+method: searched
+source: https://parlay-api.com/status (HTTP 200), https://parlay-api.com/changelog (HTTP 200), https://parlay-api.com/watch (llms.txt), openapi/parlay-api-openapi.json
+name: ParlayAPI Lifecycle
+description: Versioning, status and change-management posture read from the
+  provider's own pages on 2026-09-07.
+versioning:
+  scheme: URL path prefix (/v1) with a service version in info.version (3.2.0);
+    the-odds-api-compatible surface pinned at /v1.
+  current_version: 3.2.0
+  compatibility_promise: Drop-in replacement for the-odds-api v4 (same endpoints,
+    params and response format under /v1), per llms.txt.
+status_page:
+  url: https://parlay-api.com/status
+  status: 200
+  detail: Live status with per-source SLA tracking and incident history; a
+    machine-readable live status is served at /v1/status, and /watch continuously
+    monitors the major odds APIs (ParlayAPI included, measured identically) with
+    JSON at /watch.json.
+changelog:
+  url: https://parlay-api.com/changelog
+  status: 200
+  detail: Dated public deploy log with RSS at /changelog.rss; see
+    changelog/parlay-api-changelog.yml.
+deprecation:
+  policy: none-published
+  detail: No deprecation policy page, Sunset/Deprecation header documentation, or
+    deprecated=true operations found in the OpenAPI contract on 2026-09-07. The
+    changelog's September 2026 entry states "No field was removed or renamed" as
+    its change posture; nothing more formal is published.
+sla:
+  detail: Support SLAs are tier-attached (Business 1-day, Enterprise 4-hr, Scale
+    1-hr email/Slack response) per /limits. A GET /v1/meta/sla endpoint exists in
+    the contract but timed out on two unauthenticated probes (no response within
+    25s) on 2026-09-07.
+deprecated_operations: []
