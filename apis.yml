@@ -1,0 +1,36 @@
+name: ParlayAPI
+description: Sports odds REST API for personal and internal research projects. Free tier 1,000 credits/month; public
+  display and redistribution rights are not included.
+url: https://raw.githubusercontent.com/api-evangelist/parlay-api/refs/heads/main/apis.yml
+created: '2026-09-07'
+modified: '2026-09-07'
+specificationVersion: '0.21'
+tags:
+- Sports
+- Odds
+- Betting Data
+- Sports Data
+apis:
+- name: ParlayAPI
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Sports
+  - Odds
+  properties:
+  - type: OpenAPI
+    url: https://parlay-api.com/openapi.json
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+maintainers:
+- FN: ParlayAPI
+x-source:
+  via: api-search/inbox#22 (JacobiusMakes)
+  fetched: '2026-09-07'
+  note: Every pointer probed before writing; controls discriminate.
