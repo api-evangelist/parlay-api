@@ -22,21 +22,16 @@ tags:
 - Arbitrage
 - Streaming
 apis:
-- name: ParlayAPI
-  description: REST API for live and historical sports odds, player props,
-    prediction-market prices, arbitrage/EV scanning, and account webhooks, with
-    keyless sandbox and try surfaces, credit-based metering, and an AsyncAPI-
-    described WebSocket/SSE streaming layer.
+- aid: parlay-api:parlay-api-acceptable-use-api
+  name: ParlayAPI Acceptable Use API
+  description: The Acceptable Use API from ParlayAPI — 1 operation(s) for acceptable use.
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
-  - Sports
-  - Odds
-  - Player Props
-  - Prediction Markets
+  - Acceptable Use
   properties:
   - type: OpenAPI
-    url: openapi/parlay-api-openapi.json
+    url: openapi/parlay-api-acceptable-use-api-openapi.yml
   - type: Documentation
     url: https://parlay-api.com/docs
   - type: APIReference
@@ -47,16 +42,1740 @@ apis:
     url: https://parlay-api.com/pricing
   - type: X-MCPPackage
     url: https://github.com/JacobiusMakes/parlay-api-mcp
-  - type: MCPServer
-    url: mcp/parlay-api-mcp.yml
   - type: ToolCrosswalk
     url: mcp/parlay-api-tool-crosswalk.yml
   - type: AsyncAPI
     url: asyncapi/parlay-api-asyncapi.json
   - type: Webhooks
     url: asyncapi/parlay-api-webhooks.json
-  - type: Overlay
-    url: overlays/parlay-api-openapi-overlay.yaml
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-account-api
+  name: ParlayAPI Account API
+  description: The Account API from ParlayAPI — 1 operation(s) for account.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Account
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-account-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-affiliates-api
+  name: ParlayAPI Affiliates API
+  description: The Affiliates API from ParlayAPI — 1 operation(s) for affiliates.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Affiliates
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-affiliates-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-agent-api
+  name: ParlayAPI Agent API
+  description: The agent API from ParlayAPI — 3 operation(s) for agent.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - agent
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-agent-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-alerts-api
+  name: ParlayAPI Alerts API
+  description: The alerts API from ParlayAPI — 2 operation(s) for alerts.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - alerts
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-alerts-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-auth-api
+  name: ParlayAPI Auth API
+  description: The auth API from ParlayAPI — 6 operation(s) for auth.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - auth
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-auth-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-badge-api
+  name: ParlayAPI Badge API
+  description: The Badge API from ParlayAPI — 1 operation(s) for badge.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Badge
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-badge-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-billing-api
+  name: ParlayAPI Billing API
+  description: The billing API from ParlayAPI — 9 operation(s) for billing.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - billing
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-billing-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-calculators-api
+  name: ParlayAPI Calculators API
+  description: The Calculators API from ParlayAPI — 8 operation(s) for calculators.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Calculators
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-calculators-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-changelog-json-api
+  name: ParlayAPI Changelog.json API
+  description: The Changelog.json API from ParlayAPI — 1 operation(s) for changelog.json.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Changelog.json
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-changelog-json-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-clv-api
+  name: ParlayAPI Clv API
+  description: The clv API from ParlayAPI — 1 operation(s) for clv.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - clv
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-clv-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-collections-api
+  name: ParlayAPI Collections API
+  description: The Collections API from ParlayAPI — 2 operation(s) for collections.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Collections
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-collections-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-dashboard-api
+  name: ParlayAPI Dashboard API
+  description: The dashboard API from ParlayAPI — 3 operation(s) for dashboard.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - dashboard
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-dashboard-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-datasets-api
+  name: ParlayAPI Datasets API
+  description: The Datasets API from ParlayAPI — 2 operation(s) for datasets.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Datasets
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-datasets-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-discovery-api
+  name: ParlayAPI Discovery API
+  description: The Discovery API from ParlayAPI — 7 operation(s) for discovery.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Discovery
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-discovery-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-divergence-json-api
+  name: ParlayAPI Divergence.json API
+  description: The Divergence.json API from ParlayAPI — 1 operation(s) for divergence.json.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Divergence.json
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-divergence-json-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-dmca-api
+  name: ParlayAPI Dmca API
+  description: The Dmca API from ParlayAPI — 1 operation(s) for dmca.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Dmca
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-dmca-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-event-markets-api
+  name: ParlayAPI Event Markets API
+  description: The event_markets API from ParlayAPI — 3 operation(s) for event_markets.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - event_markets
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-event-markets-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-exchange-api
+  name: ParlayAPI Exchange API
+  description: The Exchange API from ParlayAPI — 1 operation(s) for exchange.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Exchange
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-exchange-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-exchanges-api
+  name: ParlayAPI Exchanges API
+  description: The Exchanges API from ParlayAPI — 1 operation(s) for exchanges.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Exchanges
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-exchanges-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-go-api
+  name: ParlayAPI Go API
+  description: The Go API from ParlayAPI — 1 operation(s) for go.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Go
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-go-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-health-api
+  name: ParlayAPI Health API
+  description: The Health API from ParlayAPI — 3 operation(s) for health.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Health
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-health-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-historical-api
+  name: ParlayAPI Historical API
+  description: The Historical API from ParlayAPI — 13 operation(s) for historical.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Historical
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-historical-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-key-api
+  name: ParlayAPI Key API
+  description: The Key API from ParlayAPI — 1 operation(s) for key.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Key
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-key-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-keys-api
+  name: ParlayAPI Keys API
+  description: The Keys API from ParlayAPI — 1 operation(s) for keys.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Keys
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-keys-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-legal-api
+  name: ParlayAPI Legal API
+  description: The Legal API from ParlayAPI — 7 operation(s) for legal.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Legal
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-legal-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-live-api
+  name: ParlayAPI Live API
+  description: The live API from ParlayAPI — 14 operation(s) for live.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - live
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-live-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-live-in-play-api
+  name: ParlayAPI Live & In-Play API
+  description: Live odds, in-play arbs, and SSE streaming for active games.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Live & In-Play
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-live-in-play-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-metadata-api
+  name: ParlayAPI Metadata API
+  description: The Metadata API from ParlayAPI — 34 operation(s) for metadata.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Metadata
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-metadata-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-metrics-api
+  name: ParlayAPI Metrics API
+  description: The Metrics API from ParlayAPI — 1 operation(s) for metrics.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Metrics
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-metrics-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-moves-json-api
+  name: ParlayAPI Moves.json API
+  description: The Moves.json API from ParlayAPI — 1 operation(s) for moves.json.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Moves.json
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-moves-json-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-odds-drop-api
+  name: ParlayAPI Odds Drop API
+  description: The Odds Drop API from ParlayAPI — 1 operation(s) for odds drop.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Odds Drop
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-odds-drop-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-parlayapi-api
+  name: ParlayAPI Parlay API
+  description: The ParlayAPI API from ParlayAPI — 2 operation(s) for parlayapi.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - ParlayAPI
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-parlayapi-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-partners-api
+  name: ParlayAPI Partners API
+  description: The Partners API from ParlayAPI — 1 operation(s) for partners.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Partners
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-partners-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-prediction-markets-api
+  name: ParlayAPI Prediction Markets API
+  description: Kalshi and Polymarket prediction-market prices including crypto.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Prediction Markets
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-prediction-markets-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-pricing-api
+  name: ParlayAPI Pricing API
+  description: The Pricing API from ParlayAPI — 1 operation(s) for pricing.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Pricing
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-pricing-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-privacy-api
+  name: ParlayAPI Privacy API
+  description: The Privacy API from ParlayAPI — 1 operation(s) for privacy.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Privacy
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-privacy-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-public-support-api
+  name: ParlayAPI Public Support API
+  description: The public_support API from ParlayAPI — 1 operation(s) for public_support.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - public_support
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-public-support-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-sandbox-api
+  name: ParlayAPI Sandbox API
+  description: Auth-less deterministic responses for integration testing without credits.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Sandbox
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-sandbox-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-sgp-api
+  name: ParlayAPI Sgp API
+  description: The Sgp API from ParlayAPI — 1 operation(s) for sgp.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Sgp
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-sgp-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-specification-api
+  name: ParlayAPI Specification API
+  description: OpenAPI and AsyncAPI specs describing the REST and streaming surfaces.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Specification
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-specification-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-sports-odds-api
+  name: ParlayAPI Sports & Odds API
+  description: The Sports & Odds API from ParlayAPI — 34 operation(s) for sports & odds.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Sports & Odds
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-sports-odds-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-sse-api
+  name: ParlayAPI Sse API
+  description: The Sse API from ParlayAPI — 2 operation(s) for sse.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Sse
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-sse-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-stats-api
+  name: ParlayAPI Stats API
+  description: The Stats API from ParlayAPI — 1 operation(s) for stats.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Stats
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-stats-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-terms-api
+  name: ParlayAPI Terms API
+  description: The Terms API from ParlayAPI — 1 operation(s) for terms.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Terms
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-terms-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-try-api
+  name: ParlayAPI Try API
+  description: The Try API from ParlayAPI — 6 operation(s) for try.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Try
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-try-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-verdict-api
+  name: ParlayAPI Verdict API
+  description: The Verdict API from ParlayAPI — 2 operation(s) for verdict.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Verdict
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-verdict-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-webhooks-api
+  name: ParlayAPI Webhooks API
+  description: The webhooks API from ParlayAPI — 5 operation(s) for webhooks.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - webhooks
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-webhooks-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
+  - type: ErrorCatalog
+    url: errors/parlay-api-problem-types.yml
+  - type: DataModel
+    url: data-model/parlay-api-data-model.yml
+  - type: Sandbox
+    url: sandbox/parlay-api-sandbox.yml
+  - type: RateLimits
+    url: rate-limits/parlay-api-rate-limits.yml
+  - type: Postman
+    url: https://parlay-api.com/collections/ParlayAPI.postman_collection.json
+- aid: parlay-api:parlay-api-widget-api
+  name: ParlayAPI Widget API
+  description: The Widget API from ParlayAPI — 1 operation(s) for widget.
+  humanURL: https://parlay-api.com/docs
+  baseURL: https://parlay-api.com
+  tags:
+  - Widget
+  properties:
+  - type: OpenAPI
+    url: openapi/parlay-api-widget-api-openapi.yml
+  - type: Documentation
+    url: https://parlay-api.com/docs
+  - type: APIReference
+    url: https://parlay-api.com/redoc
+  - type: LLMsTxt
+    url: https://parlay-api.com/llms.txt
+  - type: Pricing
+    url: https://parlay-api.com/pricing
+  - type: X-MCPPackage
+    url: https://github.com/JacobiusMakes/parlay-api-mcp
+  - type: ToolCrosswalk
+    url: mcp/parlay-api-tool-crosswalk.yml
+  - type: AsyncAPI
+    url: asyncapi/parlay-api-asyncapi.json
+  - type: Webhooks
+    url: asyncapi/parlay-api-webhooks.json
   - type: ErrorCatalog
     url: errors/parlay-api-problem-types.yml
   - type: DataModel
@@ -75,6 +1794,10 @@ x-source:
   fetched: '2026-09-07'
   note: Every pointer probed before writing; controls discriminate.
 common:
+- type: MCPServer
+  url: mcp/parlay-api-mcp.yml
+- type: Overlay
+  url: overlays/parlay-api-openapi-overlay.yaml
 - type: Website
   url: https://parlay-api.com
 - type: VulnerabilityDisclosure
