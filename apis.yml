@@ -136,6 +136,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Agents
+  tags_raw:
   - agent
   properties:
   - type: OpenAPI
@@ -172,6 +174,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Alerts
+  tags_raw:
   - alerts
   properties:
   - type: OpenAPI
@@ -208,6 +212,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Authentication
+  tags_raw:
   - auth
   properties:
   - type: OpenAPI
@@ -280,6 +286,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Billing
+  tags_raw:
   - billing
   properties:
   - type: OpenAPI
@@ -424,6 +432,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Collection
+  tags_raw:
   - Collections
   properties:
   - type: OpenAPI
@@ -460,6 +470,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Dashboards
+  tags_raw:
   - dashboard
   properties:
   - type: OpenAPI
@@ -604,6 +616,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - DMCA
+  tags_raw:
   - Dmca
   properties:
   - type: OpenAPI
@@ -639,7 +653,8 @@ apis:
   description: The event_markets API from ParlayAPI — 3 operation(s) for event_markets.
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
-  tags:
+  tags: []
+  tags_raw:
   - event_markets
   properties:
   - type: OpenAPI
@@ -712,6 +727,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Exchange
+  tags_raw:
   - Exchanges
   properties:
   - type: OpenAPI
@@ -964,6 +981,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Live
+  tags_raw:
   - live
   properties:
   - type: OpenAPI
@@ -1359,7 +1378,8 @@ apis:
   description: The public_support API from ParlayAPI — 1 operation(s) for public_support.
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
-  tags:
+  tags: []
+  tags_raw:
   - public_support
   properties:
   - type: OpenAPI
@@ -1540,6 +1560,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - SSE
+  tags_raw:
   - Sse
   properties:
   - type: OpenAPI
@@ -1720,6 +1742,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Webhook
+  tags_raw:
   - webhooks
   properties:
   - type: OpenAPI
@@ -1756,6 +1780,8 @@ apis:
   humanURL: https://parlay-api.com/docs
   baseURL: https://parlay-api.com
   tags:
+  - Widgets
+  tags_raw:
   - Widget
   properties:
   - type: OpenAPI
