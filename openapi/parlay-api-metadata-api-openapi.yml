@@ -1,0 +1,2158 @@
+openapi: 3.2.0
+info:
+  title: Parlay Metadata API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Metadata
+  description: 'Machine-readable platform metadata: pricing, SLA, incidents, uptime, credit costs.'
+paths:
+  /v1/meta/api-info:
+    get:
+      summary: Api Info
+      description: 'Platform metadata in one call. Public, no auth, no credits.
+
+
+        Use this to:
+
+        - Detect deploys: version + worker_started_at change after a
+
+        rolling reload. Trigger reconnect / cache refresh on a change.
+
+        - Health-check externally with a single endpoint that summarizes
+
+        version, source coverage, endpoint count, and links.
+
+        - Programmatically discover docs / OpenAPI / AsyncAPI URLs.
+
+
+        Cheap to call. Server-side computation: a few dict literals plus
+
+        one `len(app.routes)`. No DB hits.'
+      operationId: api_info_v1_meta_api_info_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/credit-costs:
+    get:
+      summary: Credit Costs
+      description: 'Machine-readable per-endpoint credit cost catalogue. Public,
+
+        no auth, no credits charged.
+
+
+        Use cases:
+
+        - Build a cost calculator in your app ("this analysis will use
+
+        N credits").
+
+        - Estimate monthly burn before committing to a tier.
+
+        - Drive a usage dashboard alongside `/v1/usage` (current spend)
+
+        and `/v1/pricing` (tier credit allowance).
+
+
+        Response shape:
+
+        {
+
+        "currency": "credits",
+
+        "version": "0.1",
+
+        "fixed": [{method, path, cost, desc}, ...],
+
+        "variable": [{method, path, cost_formula, cost_floor, example, desc}, ...],
+
+        "free_examples": [path, ...],
+
+        "notes": [...]
+
+        }
+
+
+        Stability promise: the keys `currency`, `version`, `fixed`,
+
+        `variable`, `free_examples` will not be removed or renamed. Per-
+
+        endpoint costs may change with notice via /changelog. The
+
+        `version` field bumps when a breaking schema change happens.
+
+
+        sleep_iter_21 #520: emits ETag + supports If-None-Match for 304
+
+        Not-Modified responses. SDK clients with conditional-GET wiring
+
+        skip transferring the body when the cost catalogue hasn''t
+
+        changed since the last fetch.'
+      operationId: credit_costs_v1_meta_credit_costs_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/quote:
+    post:
+      summary: Quote Credits
+      description: 'Preview the credit cost of a request without executing it.
+
+
+        Public, no auth, no credits charged.
+
+
+        Request body:
+
+        ```
+
+        {
+
+        "method": "GET",
+
+        "path": "/v1/sports/baseball_mlb/odds",
+
+        "query": {"markets": "h2h,spreads", "regions": "us"}
+
+        }
+
+        ```
+
+
+        Response:
+
+        ```
+
+        {
+
+        "estimated_credits": 2,
+
+        "cost_basis": "len(markets)=2 x len(regions)=1",
+
+        "cost_type": "variable",
+
+        "matched_template": "/v1/sports/{sport_key}/odds",
+
+        "description": "Multi-market multi-region odds",
+
+        "cost_floor": 1
+
+        }
+
+        ```
+
+
+        Use cases:
+
+        - Batch analysis budgeting: estimate cost of running an
+
+        analysis across N events before committing.
+
+        - Tier upgrade planning: see how much a typical workflow
+
+        costs before subscribing.
+
+        - SDK helper: client.estimate_cost(params) before
+
+        client.get_odds(params).
+
+
+        For fixed-cost endpoints, this just looks up the cost. For
+
+        variable-cost endpoints, it parses the query and applies the
+
+        formula from _CREDIT_COSTS.
+
+
+        sleep_iter_48 #546.'
+      operationId: quote_credits_v1_meta_quote_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+              title: Payload
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/batch-quote:
+    post:
+      summary: Batch Quote Credits
+      description: 'Batch credit-cost preview. Public, no auth, no credits.
+
+
+        Request body:
+
+        ```
+
+        {
+
+        "requests": [
+
+        {"method": "GET", "path": "/v1/sports/baseball_mlb/odds", "query": {"markets": "h2h"}},
+
+        {"method": "GET", "path": "/v1/sports/baseball_mlb/props", "query": {}},
+
+        {"method": "POST", "path": "/v1/parlay/price", "query": {"legs_count": "3"}},
+
+        ...
+
+        ]
+
+        }
+
+        ```
+
+
+        Response:
+
+        ```
+
+        {
+
+        "total_estimated_credits": 42,
+
+        "request_count": 3,
+
+        "per_request": [
+
+        {"index": 0, "estimated_credits": 1, "cost_type": "variable", ...},
+
+        {"index": 1, "estimated_credits": 3, "cost_type": "fixed", ...},
+
+        {"index": 2, "estimated_credits": 6, "cost_type": "variable", ...}
+
+        ],
+
+        "errors": []
+
+        }
+
+        ```
+
+
+        Use cases:
+
+        - Planning a batch script: estimate total cost across N
+
+        calls before committing.
+
+        - Tier upgrade calculator: simulate a typical month of
+
+        calls, compare to tier.credits_per_month.
+
+        - SDK helper: client.estimate_batch(requests) before
+
+        asyncio.gather(*[client.request(r) for r in requests]).
+
+
+        Cap of 500 requests per batch to prevent abuse.
+
+
+        sleep_iter_52 #550.'
+      operationId: batch_quote_credits_v1_meta_batch_quote_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              type: object
+              title: Payload
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/sla:
+    get:
+      summary: Get Sla
+      description: 'Machine-readable SLA targets. Public, no auth, no credits.
+
+
+        Returns the operational targets ParlayAPI commits to plus the
+
+        measured baselines (latency p50s, support response times,
+
+        maintenance / data retention policy). Procurement and security
+
+        review teams ingest this for vendor evaluation.
+
+
+        Numbers reflect operational reality, not aspirational targets.
+
+        Latency p50s are measured from the public URL; uptime
+
+        targets reflect what the current architecture can sustain.
+
+
+        sleep_iter_28 #527: emits ETag + supports If-None-Match. Changes
+
+        only when the SLA document itself is edited (a contract event,
+
+        not a per-request event), so 1h cache + conditional GET is the
+
+        right shape.
+
+
+        Stability promise: keys at the top level
+
+        (`version`, `uptime_target_per_month`, `latency_targets_p50_ms`,
+
+        `support_response_time_hours`, `maintenance_window_policy`,
+
+        `data_retention`, `incident_response`) will not be removed or
+
+        renamed without bumping `version`.'
+      operationId: get_sla_v1_meta_sla_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/sdks:
+    get:
+      summary: Get Sdks
+      description: 'Machine-readable SDK catalogue. Public, no auth, no credits.
+
+
+        Returns:
+
+        - first_party: SDKs we publish ourselves (parlayapi-mcp on PyPI)
+
+        - generators: official OpenAPI/AsyncAPI generator commands
+
+        - integrations: MCP, Postman, Insomnia, etc.
+
+
+        Lets customers and AI agents discover the right integration
+
+        path without reading the /docs page. The OpenAPI extensions
+
+        from iter_19 (x-credit-cost) and iter_24 (servers,
+
+        securitySchemes) make every generated SDK fully-typed,
+
+        cost-aware, and auth-pre-plumbed.
+
+
+        sleep_iter_38 #537: emits ETag + supports If-None-Match.
+
+        Changes only when SDK landscape shifts (a new official SDK,
+
+        a new supported generator language).'
+      operationId: get_sdks_v1_meta_sdks_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/source-capabilities:
+    get:
+      summary: Source Capabilities
+      description: 'Machine-readable source capability matrix. Public, no auth,
+
+        no credits.
+
+
+        Returns:
+
+        - `sources[]`: per-source entry with key, title, region, status,
+
+        capabilities (list of supported categories), aliases_to (if
+
+        applicable)
+
+        - `by_capability{}`: inverse index for each capability type,
+
+        listing all sources that support it
+
+        - `capabilities[]`: canonical list of capability category names
+
+
+        Example use cases:
+
+        - Customer building a "best book for NBA props" comparison: filter
+
+        by_capability.props ∩ regions==us
+
+        - SDK init: cache the matrix, then locally filter when user picks
+
+        a market type
+
+        - AI agent: answer "which books carry NHL game-line live odds?"
+
+        in one fetch
+
+
+        sleep_iter_53 #551: emits ETag + supports If-None-Match.
+
+        Source landscape changes only when we add a new book or flip a
+
+        status; ETag round-trips work for SDK boot polling.'
+      operationId: source_capabilities_v1_meta_source_capabilities_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/endpoints:
+    get:
+      summary: List Endpoints
+      description: 'Lean endpoint catalogue. Public, no auth, no credits.
+
+
+        Returns the same path + method + tag + summary + credit-cost info
+
+        as /openapi.json but stripped of request/response schemas. ~10 KB
+
+        payload vs ~194 KB for the full spec. SDK clients fetching this
+
+        at boot for "what endpoints exist?" save bandwidth.
+
+
+        Each entry:
+
+        - path: templated URL ("/v1/sports/{sport_key}/odds")
+
+        - method: HTTP verb (GET, POST, etc.)
+
+        - tags: list of canonical tags from iter_35
+
+        - summary: short description (when set in route docstring)
+
+        - description: full prose (truncated to 200 chars)
+
+        - deprecated: bool (iter_47 OpenAPI deprecation flag)
+
+        - x-credit-cost: int for fixed-cost endpoints
+
+        - x-credit-cost-type: "fixed" | "variable" | absent (free)
+
+        - x-credit-cost-description: short capability summary
+
+
+        Optional filters: ?tag=Metadata, ?method=POST.
+
+
+        sleep_iter_55 #552: emits ETag + supports If-None-Match.
+
+        Changes only when OpenAPI schema regenerates (deploy or
+
+        schema-edit).'
+      operationId: list_endpoints_v1_meta_endpoints_get
+      parameters:
+      - name: tag
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to endpoints carrying this tag (e.g. 'Metadata', 'Calculators', 'Sports & Odds').
+          title: Tag
+        description: Filter to endpoints carrying this tag (e.g. 'Metadata', 'Calculators', 'Sports & Odds').
+      - name: method
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to a specific HTTP method (GET, POST, etc.).
+          title: Method
+        description: Filter to a specific HTTP method (GET, POST, etc.).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/webhooks:
+    get:
+      summary: Webhooks Spec
+      description: 'Machine-readable webhook specification. Public, no auth,
+
+        no credits.
+
+
+        Returns:
+
+        - `events[]`: canonical event type list with descriptions
+
+        - `signing`: HMAC scheme, header format, verification snippet
+
+        - `retry_policy`: attempts + backoff + auto-disable rules
+
+        - `tier_gate`: which tiers can use webhooks
+
+        - `management`: full CRUD endpoint URLs
+
+        - `delivery`: payload shape + headers we send
+
+
+        Customers building event-driven integrations get the full
+
+        spec in one fetch instead of reading docs HTML.
+
+
+        Industry pattern: Stripe, Twilio, GitHub all publish their
+
+        webhook spec at a discoverable URL. We follow the same shape.
+
+
+        sleep_iter_56 #553: emits ETag + supports If-None-Match.'
+      operationId: webhooks_spec_v1_meta_webhooks_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/provider-state:
+    get:
+      summary: Provider State
+      description: 'Per-source provider-state metadata. Machine-readable freshness +
+
+        role for every data source we currently ingest from. No API key
+
+        required, no credits charged. Polls cheap: 5s server-side cache.
+
+
+        Response shape:
+
+
+        {
+
+        "ts": 1778735000,
+
+        "src": {
+
+        "pinnacle": {"age_s": 1.2, "role": "primary"},
+
+        "draftkings": {"age_s": 3.8, "role": "primary"},
+
+        "fanduel": {"age_s": 47, "role": "degraded"},
+
+        "caesars": {"age_s": null, "role": "offline"}
+
+        }
+
+        }
+
+
+        Role values:
+
+        primary last write within source''s expected polling window
+
+        degraded last write within 3x the window; data may be stale
+
+        offline last write past 30x window, or no recent writes seen
+
+
+        Each /v1/* response also includes this in the `X-Provider-State`
+
+        header, so most clients can avoid this endpoint entirely. Hit this
+
+        endpoint directly only when you want the full untruncated payload
+
+        (the header is capped at ~2 KB to fit HTTP limits).'
+      operationId: provider_state_v1_meta_provider_state_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/source-quality:
+    get:
+      summary: Source Quality
+      description: 'Per-source speed and quality metadata. Public, no auth, no credits.
+
+
+        This complements /v1/meta/provider-state with an operator-grade
+
+        view over recent write activity across odds, props, and period
+
+        markets. It returns SLA state, age, observed row counts, and the
+
+        next recommended cadence action for each source.
+
+
+        The endpoint reads metadata only. It does not create, modify, or
+
+        infer prices.'
+      operationId: source_quality_v1_meta_source_quality_get
+      parameters:
+      - name: minutes
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1440
+          minimum: 1
+          default: 10
+          title: Minutes
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 40
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/source-health:
+    get:
+      summary: Source Health Alias
+      description: 'Compatibility alias for /v1/meta/source-quality.
+
+
+        Operators and older docs often say "source health" when referring
+
+        to this payload. Keep the alias live so quick diagnostics do not
+
+        404 during an incident.'
+      operationId: source_health_alias_v1_meta_source_health_get
+      parameters:
+      - name: minutes
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1440
+          minimum: 1
+          default: 10
+          title: Minutes
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          default: 40
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/collector-flush:
+    get:
+      summary: Collector Flush Meta
+      description: 'Latest collector flush telemetry. Public, no auth, no credits.
+
+
+        Shows whether the database writer is keeping up with the fetchers:
+
+        elapsed flush time, rows written by kind, remaining queue depth, and
+
+        per-source contributors. This is the first place to look when
+
+        source pulses are fresh but price-write timestamps lag behind.'
+      operationId: collector_flush_meta_v1_meta_collector_flush_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/latest-state:
+    get:
+      summary: Latest State Meta
+      description: 'Redis latest-state telemetry. Public, no auth, no credits.
+
+
+        This is the hot lane ahead of Postgres archive flush: latest
+
+        accepted row by source plus collector-lag percentiles. It is
+
+        observability only and does not derive, modify, or backfill prices.'
+      operationId: latest_state_meta_v1_meta_latest_state_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1000
+          minimum: 1
+          default: 200
+          title: Limit
+      - name: latency_window_s
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 3600
+          minimum: 60
+          default: 900
+          title: Latency Window S
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/per-book-sla:
+    get:
+      summary: Meta Per Book Sla
+      description: 'Per-book freshness SLA thresholds. Public, no auth, no credits.
+
+
+        Returns the (tight_s, slack_s, stale_s) thresholds used to classify
+
+        each source as ok / degraded / breach / stale in the source-quality
+
+        payloads. Customers integrating against /v1/meta/source-quality use
+
+        this to know what `sla=degraded` actually means for a given book
+
+        (e.g. "Pinnacle tight=5s, Bovada tight=30s, PrizePicks tight=60s").
+
+
+        Memory rule compliance: read-only on already-public threshold
+
+        config. No prices touched.'
+      operationId: meta_per_book_sla_v1_meta_per_book_sla_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/parser-coverage:
+    get:
+      summary: Meta Parser Coverage
+      description: 'Per-book per-sport market-coverage matrix. Public, no auth, no credits.
+
+
+        Answers the customer question "which markets do you actually parse
+
+        from Caesars on NBA?" or "what markets does Pinnacle expose on
+
+        table_tennis?" by aggregating observed market_keys from the
+
+        prop_snapshots and odds_snapshots tables over the requested
+
+        window.
+
+
+        Returns:
+
+        {
+
+        "as_of": "...",
+
+        "window_hours": 72,
+
+        "book_count": 32, // operators, the keys /odds serves
+
+        "source_count": 45, // raw ingest feeds behind them
+
+        "variants": {"unibet": ["unibet", "unibet_au", ...], ...},
+
+        "by_book": {
+
+        "draftkings": {
+
+        "baseball_mlb": {
+
+        "markets": ["player_home_runs", "player_strikeouts", ...],
+
+        "row_count": 14821,
+
+        "latest_age_s": 12.3
+
+        },
+
+        ...
+
+        },
+
+        ...
+
+        }
+
+        }
+
+
+        `book_count` counts operators, not feeds: an operator that publishes
+
+        country-licensed feeds off one platform (Kindred runs 14 Unibet feeds)
+
+        is one book, the same one /odds and /props serve. Its markets are the
+
+        union of its feeds'' markets and its row_count their sum. `source_count`
+
+        keeps the raw feed total visible and `variants` names the members, so
+
+        nothing is hidden by the fold. Naming one feed with ?source= returns it
+
+        under its own name.
+
+
+        Memory rule compliance: read-only on metadata. No prices touched.'
+      operationId: meta_parser_coverage_v1_meta_parser_coverage_get
+      parameters:
+      - name: window_hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 720
+          minimum: 1
+          default: 72
+          title: Window Hours
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional filter to one book.
+          title: Source
+        description: Optional filter to one book.
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional filter to one sport.
+          title: Sport Key
+        description: Optional filter to one sport.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/book-coverage:
+    get:
+      summary: Meta Book Coverage
+      description: 'Per-book coverage gates across game, prop, and period markets.
+
+
+        Public, no auth, no credits. This is the machine-readable proof
+
+        surface behind the coverage dashboard: every current book/sport/kind
+
+        row gets source freshness, normalization, database, REST-shape, and
+
+        stream-shape gates.'
+      operationId: meta_book_coverage_v1_meta_book_coverage_get
+      parameters:
+      - name: window_minutes
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1440
+          minimum: 5
+          default: 15
+          title: Window Minutes
+      - name: include_warn
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: true
+          title: Include Warn
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/pricing:
+    get:
+      summary: Get Pricing
+      description: 'Public pricing endpoint. Returns the tier table for programmatic
+
+        integration (Stripe widgets, AI agents, comparison pages, the JSON
+
+        side of the HTML /pricing page). No API key required.
+
+
+        sleep_iter_21 #520: emits ETag + supports If-None-Match. Pricing
+
+        changes rarely (a few times a year at most). Clients with
+
+        conditional-GET wiring skip the body on 304.'
+      operationId: get_pricing_v1_pricing_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/status:
+    get:
+      summary: Status Json
+      description: '**Public, no-auth.** Live endpoint health: per-source freshness,
+
+        request-rate-log p50/p95, total request count last hour.
+
+
+        Same data the /status page renders. Refreshes every 90 seconds.
+
+
+        Cached 90s with stale-while-revalidate plus background refresh, so a
+
+        request never blocks on the heavy per-source aggregate. Warm cache is
+
+        served directly; a stale cache is served immediately while one worker
+
+        recomputes off the request path; only a truly cold cache computes inline,
+
+        single-flighted and time-bounded so a slow aggregate returns a quick 503
+
+        instead of hanging into a proxy 500. (Pre-fix, concurrent cold polls each
+
+        ran the same ~3s aggregate at once; I/O contention inflated every one to
+
+        ~18s and tripped the worker timeout into 500s.)'
+      operationId: status_json_v1_status_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/status/history:
+    get:
+      summary: Status History
+      description: 'Trailing-window SLA history per source. Public, no auth.
+
+
+        Pairs with /v1/status (which is point-in-time). This endpoint
+
+        returns the timeline that backs the /status page''s uptime chart.
+
+        Default window is 24 hours (86400s). Max is 7 days.
+
+
+        Memory rule compliance: returns metadata only (SLA classification
+
+        + age). No prices touched. Reads from a Redis ring buffer populated
+
+        by the collector''s source_quality_history_loop; the buffer is
+
+        bounded so the endpoint cost is constant regardless of uptime.
+
+
+        An empty `sources` always comes with a `_note` saying why, and
+
+        `newest_sample_age_s` when the buffer holds samples older than the
+
+        requested window, so a stopped sampler is distinguishable from a quiet
+
+        one without opening a support ticket.
+
+
+        Returns:
+
+        {
+
+        "as_of": "...",
+
+        "window_s": 86400,
+
+        "sources": {
+
+        "pinnacle": [
+
+        {"ts": ..., "sla": "ok", "age_s": 4.2},
+
+        ...
+
+        ],
+
+        ...
+
+        }
+
+        }'
+      operationId: status_history_v1_status_history_get
+      parameters:
+      - name: window_s
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 604800
+          minimum: 300
+          default: 86400
+          title: Window S
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional single source to return.
+          title: Source
+        description: Optional single source to return.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/usage:
+    get:
+      summary: Get Usage
+      description: 'Check your API usage and remaining credits.
+
+
+        /v1/account is the path the published MCP server calls (tool
+
+        parlayapi_account_info, mcp-server/parlayapi_mcp/server.py:273).
+
+        Aliasing it to /v1/usage so the MCP tool doesn''t 404 (#040).
+
+
+        Pass `?by_endpoint=true` to get a per-endpoint breakdown of
+
+        credit usage in the current period (iter_060 #469).'
+      operationId: get_usage_v1_usage_get
+      parameters:
+      - name: by_endpoint
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: 'Include a per-endpoint credit-usage breakdown for the current billing period. iter_060 #469: customers asked for ''where did my credits go this month''. Off by default so the response stays lean.'
+          default: false
+          title: By Endpoint
+        description: 'Include a per-endpoint credit-usage breakdown for the current billing period. iter_060 #469: customers asked for ''where did my credits go this month''. Off by default so the response stays lean.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/movers:
+    get:
+      summary: Meta Movers
+      description: 'Live biggest market movers. Returns events whose moneyline
+
+        has moved the most over the requested window, ranked by absolute
+
+        delta. Computed from the odds_snapshots first-vs-last comparison
+
+        on the canonical moneyline (home_ml, away_ml).
+
+
+        Public, no auth, no credits. 90-second server-side cache.
+
+
+        Response shape:
+
+        {
+
+        "as_of": "...",
+
+        "window_minutes": N,
+
+        "sport_key": "...",
+
+        "movers": [
+
+        {
+
+        "sport_key": "...",
+
+        "home_team": "...", "away_team": "...",
+
+        "commence_time": "...",
+
+        "home_ml_first": -110, "home_ml_last": -135,
+
+        "home_ml_delta": -25,
+
+        "away_ml_first": -110, "away_ml_last": +110,
+
+        "away_ml_delta": +20,
+
+        "abs_max_delta": 25,
+
+        "snapshots_seen": 47,
+
+        "source": "pinnacle"
+
+        },
+
+        ...
+
+        ]
+
+        }
+
+
+        Use `source=pinnacle` semantics: this is the sharp anchor''s view
+
+        of how the line moved. To get movers from a soft book''s view,
+
+        customer can run their own join against /v1/sports/{sport}/odds
+
+        history. For most users, sharp-anchor movement is the more
+
+        interesting signal.'
+      operationId: meta_movers_v1_meta_movers_get
+      parameters:
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional sport filter. Defaults to all sports.
+          title: Sport Key
+        description: Optional sport filter. Defaults to all sports.
+      - name: window_minutes
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 360
+          minimum: 5
+          description: Lookback window in minutes (5 to 360, default 60).
+          default: 60
+          title: Window Minutes
+        description: Lookback window in minutes (5 to 360, default 60).
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          description: Top N movers to return (default 15).
+          default: 15
+          title: Limit
+        description: Top N movers to return (default 15).
+      - name: pre_game_only
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: If true (default), only return events whose commence_time is still in the future. Filters out the in-play price-collapse cases that otherwise dominate (tennis match in progress, late-game hockey, etc). Pass false to include live-game moves.
+          default: true
+          title: Pre Game Only
+        description: If true (default), only return events whose commence_time is still in the future. Filters out the in-play price-collapse cases that otherwise dominate (tennis match in progress, late-game hockey, etc). Pass false to include live-game moves.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/limits:
+    get:
+      summary: Meta Limits
+      description: 'Per-tier rate-limit + credit-limit reference. Machine-readable
+
+        JSON; companion to the human-readable /limits HTML.
+
+
+        Public, no auth. The values returned here are the canonical
+
+        operator-set limits and match what''s enforced in production.'
+      operationId: meta_limits_v1_meta_limits_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/api-key-check:
+    get:
+      summary: Meta Api Key Check
+      description: 'Validate an API key without consuming credits. Useful for
+
+        CI/CD pre-flight, signup-flow validation, and SDK boot-time
+
+        sanity checks.
+
+
+        Pass the key via the same channels as any authenticated endpoint:
+
+        `X-API-Key` header, `Authorization: Bearer `, or
+
+        `?apiKey=...` query param.
+
+
+        No credit cost. Returns the tier, active state, credit headroom,
+
+        and a `valid` boolean. Distinguishes 4 outcomes:
+
+        - 200 `{"valid": true, ...}` for a healthy key
+
+        - 200 `{"valid": false, "reason": "..."}` for an invalid key
+
+        (this lets CI scripts treat invalid-key as a soft failure
+
+        without parsing 401 envelopes)
+
+        - 200 `{"valid": false, "reason": "credit_exhausted", ...}`
+
+        for a key that is structurally valid but has burned its
+
+        monthly allowance
+
+        - 200 `{"valid": false, "reason": "key_inactive", ...}` for
+
+        a key that has been deactivated by the owner'
+      operationId: meta_api_key_check_v1_meta_api_key_check_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/usage:
+    get:
+      summary: Meta Usage
+      description: 'Caller''s current-period usage summary. Returns credits used
+
+        this month, credits remaining, daily breakdown for the requested
+
+        history window, and top endpoints by credit consumption.
+
+
+        Public auth: any valid key works. Costs 0 credits to read your
+
+        own usage. Pair with /v1/meta/api-key-check for the pre-flight
+
+        case.'
+      operationId: meta_usage_v1_meta_usage_get
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 90
+          minimum: 1
+          description: Days of usage history to summarize (default 7, max 90).
+          default: 7
+          title: Days
+        description: Days of usage history to summarize (default 7, max 90).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/diagnostic:
+    get:
+      summary: Meta Diagnostic
+      description: 'Customer-facing connectivity diagnostic. Returns everything the
+
+        caller needs to debug "why can''t I reach the API."
+
+
+        Public, no auth, no credits. The endpoint is intentionally simple
+
+        so a misconfigured firewall / ISP filter / corporate proxy can be
+
+        distinguished from a real outage. Pair with /diag (HTML) which
+
+        runs every check from the browser and renders results.
+
+
+        Response shape:
+
+        {
+
+        "as_of": "...", // server-side time
+
+        "as_of_unix": 1234567890,
+
+        "client_ip": "...",
+
+        "client_country_hint": "...", // IP geo if available
+
+        "client_asn_hint": "...", // ASN if available
+
+        "request_received_via": {
+
+        "scheme": "https",
+
+        "host": "parlay-api.com",
+
+        "user_agent": "..."
+
+        },
+
+        "expected_signature": "PARLAY-OK-2026", // string the
+
+        // browser can grep for
+
+        "tls_fingerprint": null, // not yet
+
+        "headers_we_set_back": {...}, // CORS, CSP, etc.
+
+        "tests": [
+
+        {"name":"server_time", "ok":true, "note":"..."},
+
+        {"name":"tls_active", "ok":true, "note":"..."},
+
+        {"name":"cors", "ok":true, "note":"..."},
+
+        ...
+
+        ]
+
+        }
+
+
+        If a customer can hit this endpoint at all, their network can reach
+
+        us. If they cannot (DNS NXDOMAIN, ISP filter HTML, timeout, etc.)
+
+        they know it''s NOT us and they need to look at their network path.'
+      operationId: meta_diagnostic_v1_meta_diagnostic_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/status-history.json:
+    get:
+      summary: Meta Status History Json
+      description: 'Machine-readable incident / status history. JSON companion to
+
+        /status/history HTML and the existing /v1/meta/incidents endpoint
+
+        (which only surfaces structured incidents we explicitly logged).
+
+
+        Public, no auth. 5-min server-side cache.
+
+
+        Response shape:
+
+        {
+
+        "as_of": "...",
+
+        "window_days": N,
+
+        "incident_count": N,
+
+        "incidents": [
+
+        {"start": "...", "end": "...", "status": "resolved",
+
+        "severity": "minor|major|critical",
+
+        "title": "...",
+
+        "summary": "...",
+
+        "components_affected": [...]},
+
+        ...
+
+        ],
+
+        "uptime_pct_window": 99.95
+
+        }'
+      operationId: meta_status_history_json_v1_meta_status_history_json_get
+      parameters:
+      - name: days
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 180
+          minimum: 1
+          description: Days of history to return (default 30, max 180).
+          default: 30
+          title: Days
+        description: Days of history to return (default 30, max 180).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/book-catalog:
+    get:
+      summary: Meta Book Catalog
+      description: 'Full registered-book catalog with class labels and ingest status.
+
+
+        Sister to /v1/meta/source-stack: where source-stack is curated and
+
+        deep (full integration metadata for each book we''ve genuinely
+
+        wired live), this endpoint is breadth-oriented and surfaces every
+
+        book in the classification registry alongside a `live` flag
+
+        indicating whether it''s currently producing rows.
+
+
+        Use cases:
+
+        - Customer auditing "do you cover sportsbook X?" with one HTTP
+
+        GET instead of having to read the source-stack and figure out
+
+        what''s missing
+
+        - AI agents enumerating coverage for a comparison page
+
+        - Operators identifying which scaffolded modules haven''t yet
+
+        been promoted to live ingest
+
+
+        Response shape:
+
+        {
+
+        "as_of_iso": "...",
+
+        "aggregate": {
+
+        "books_total": N, // every key in classification registry
+
+        "books_live": N, // subset currently producing rows
+
+        "books_scaffolded_not_live": N,
+
+        "by_class": {"us_retail": N, "uk": N, ...},
+
+        "by_class_with_live": {
+
+        "us_retail": {"total": N, "live": N}, ...
+
+        }
+
+        },
+
+        "books": [
+
+        {
+
+        "key": "fanduel",
+
+        "class": "us_retail",
+
+        "title": "FanDuel", // display name from BOOKMAKER_TITLES
+
+        "live": true, // saw rows in last 24h
+
+        "rows_24h": N, // 0 if not live
+
+        "variants": [...], // feeds folded in; absent if just one
+
+        "variant_of": "unibet" // absent unless this key IS a variant
+
+        },
+
+        ...
+
+        ]
+
+        }
+
+
+        rows_24h is credited to the OPERATOR: a book''s country-licensed feeds
+
+        (unibet_se, unibet_ro, ...) count toward the book /odds serves, and
+
+        `variants` names them. Two Unibet variants are registered in their own
+
+        right and keep their own rows; they carry `variant_of` so counting
+
+        operators means counting `variant_of or key`.
+
+
+        Public, no auth, no credits. 5-minute server-side cache so
+
+        polling is cheap; live counts refresh on a 5-min cadence.'
+      operationId: meta_book_catalog_v1_meta_book_catalog_get
+      parameters:
+      - name: class
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to a single class (e.g. us_retail, uk, br, exchange). Omit for all classes.
+          title: Class
+        description: Filter to a single class (e.g. us_retail, uk, br, exchange). Omit for all classes.
+      - name: live
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: 'true: only books that produced rows in past 24h. false: only scaffolded-not-live. Omit for all.'
+          title: Live
+        description: 'true: only books that produced rows in past 24h. false: only scaffolded-not-live. Omit for all.'
+      - name: region
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to books with this region tag (e.g. US-NJ, BR, ES, FR, DE, AU). Matches against the regions list of each entry in /v1/meta/source-stack (when available).
+          title: Region
+        description: Filter to books with this region tag (e.g. US-NJ, BR, ES, FR, DE, AU). Matches against the regions list of each entry in /v1/meta/source-stack (when available).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/event-search:
+    get:
+      summary: Meta Event Search
+      description: 'Server-side event search by team name. Useful for "find me all
+
+        upcoming NBA games featuring the Lakers" or "what''s the next
+
+        Pinnacle-priced Yankees game."
+
+
+        Public, no auth, no credits. 60-second server-side cache. Searches
+
+        forward-looking events only; for historical lookups use
+
+        /v1/historical/closing-lines.json.
+
+
+        The match is case-insensitive substring against `home_team` and
+
+        `away_team`. Multi-word queries are split on whitespace and require
+
+        all tokens to be present somewhere in the matchup.
+
+
+        Response shape:
+
+        {
+
+        "as_of": "...",
+
+        "query": "lakers",
+
+        "sport_key": null,
+
+        "hours_ahead": 168,
+
+        "result_count": N,
+
+        "results": [
+
+        {"sport_key":"...","commence_time":"...",
+
+        "home_team":"...","away_team":"...",
+
+        "books_available": N,
+
+        "earliest_observation": "..."},
+
+        ...
+
+        ]
+
+        }'
+      operationId: meta_event_search_v1_meta_event_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 80
+          description: Search query. Matches against home_team, away_team, or both.
+          title: Q
+        description: Search query. Matches against home_team, away_team, or both.
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional sport filter (e.g. baseball_mlb).
+          title: Sport Key
+        description: Optional sport filter (e.g. baseball_mlb).
+      - name: hours_ahead
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 720
+          minimum: 1
+          description: Only return events with commence_time within the next N hours (default 168=7 days).
+          default: 168
+          title: Hours Ahead
+        description: Only return events with commence_time within the next N hours (default 168=7 days).
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: Max results to return (default 20).
+          default: 20
+          title: Limit
+        description: Max results to return (default 20).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/markets:
+    get:
+      summary: Meta Markets
+      description: 'List of every market_key the API can return, grouped by family.
+
+
+        Public, no auth, no credits. Static catalog plus dynamic per-source
+
+        coverage hints from the parser-coverage matrix (use
+
+        /v1/meta/parser-coverage for the live "which books expose which
+
+        markets" answer).'
+      operationId: meta_markets_v1_meta_markets_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/regions:
+    get:
+      summary: Meta Regions
+      description: 'Region codes accepted by the `regions=` query param, which books in
+
+        each one are actually writing prices, and the exact book set `regions=`
+
+        narrows /odds to.
+
+
+        `active_books` is the coverage answer: a book is active in a region only
+
+        if the region declares it, it is neither suppressed nor retired, it is in
+
+        the registry /v1/bookmakers publishes, and it has written rows in the
+
+        last 24 hours. `books` / `odds_filter_books` remain the /odds filter,
+
+        which is a different and larger set.
+
+
+        Public, no auth, no credits. Pair with /v1/meta/markets (canonical
+
+        market keys), /v1/meta/parser-coverage (live per-book per-sport
+
+        coverage matrix), and /v1/meta/per-book-sla (freshness thresholds).'
+      operationId: meta_regions_v1_meta_regions_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Metadata
+  /v1/meta/changelog:
+    get:
+      summary: Meta Changelog Json
+      description: 'Machine-readable changelog. Public, no auth, no credits.
+
+
+        Returns an ordered list of changelog entries (newest first). Each
+
+        entry has `date` (ISO 8601 yyyy-mm-dd), `title`, `tags` (list of
+
+        short strings), `summary` (first paragraph as plain text), and
+
+        `url` (anchor into the human-readable HTML page).
+
+
+        Use cases:
+
+        - SDK release-notes banner: poll once per deploy, show new entries
+
+        since last seen `worker_started_at`.
+
+        - Customer dashboard "what''s new" widget.
+
+        - AI agent summarizing platform changes in conversation.
+
+        - Slack / Discord bot in your team channel mirroring updates.
+
+
+        The HTML page at /changelog and RSS feed at /changelog.rss share
+
+        this same source-of-truth (static/changelog.html), so all three
+
+        surfaces are guaranteed in sync.'
+      operationId: meta_changelog_json_v1_meta_changelog_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/incidents:
+    get:
+      summary: Incidents Json
+      description: 'Machine-readable incident history. Public, no auth, no credits.
+
+
+        Returns an ordered list of platform incidents (most recent first)
+
+        with start / resolved timestamps, impact summary, root cause,
+
+        resolution, affected endpoints. Customers ingest this for:
+
+
+        - Vendor reliability scoring matrix.
+
+        - SLA-compliance verification (the times we missed our targets).
+
+        - Status-page rollups (some customers render their own).
+
+        - AI agent answering "has ParlayAPI been reliable recently?"
+
+
+        Empty / short record is itself a meaningful signal — the absence
+
+        of incidents over a long window indicates a stable platform.
+
+
+        Source-of-truth is src/api/static/incidents.json (human-edited,
+
+        git-versioned). Each incident has a stable `id` so customers
+
+        can dedupe across polls.
+
+
+        Stability promise: `id`, `title`, `status`, `severity`,
+
+        `started_at`, `resolved_at`, `impact` keys will not be removed
+
+        or renamed without bumping `version`.'
+      operationId: incidents_json_v1_meta_incidents_get
+      parameters:
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter by status: ''resolved'' (closed), ''investigating'', ''identified'', ''monitoring'', ''open'' (all non-resolved). Omit for all.'
+          title: Status
+        description: 'Filter by status: ''resolved'' (closed), ''investigating'', ''identified'', ''monitoring'', ''open'' (all non-resolved). Omit for all.'
+      - name: since
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: ISO 8601 date (YYYY-MM-DD) to filter incidents started on or after this date.
+          title: Since
+        description: ISO 8601 date (YYYY-MM-DD) to filter incidents started on or after this date.
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+  /v1/meta/uptime:
+    get:
+      summary: Uptime Stats
+      description: 'Per-worker request counters since worker boot. Public, no
+
+        auth, no credits.
+
+
+        Returns:
+
+        - total_requests: every request the worker has served
+
+        - by_status_class: {2xx, 3xx, 4xx, 5xx}
+
+        - error_rate_pct: 5xx / total * 100 (server-error rate)
+
+        - success_rate_pct: 2xx / total * 100
+
+        - server_error_first_at / server_error_last_at: timestamps of
+
+        first/last 5xx (null if none)
+
+        - worker_started_at + worker_uptime_seconds (matches api-info)
+
+
+        Reset on every rolling reload (per-worker, in-process). The 5-
+
+        worker pool means a customer polling sees one worker''s stats per
+
+        poll. Over time the round-robin load balancer surfaces a
+
+        representative sample.
+
+
+        For a cross-worker aggregate uptime % a future iter could push
+
+        these counters to Redis on a periodic flush. For now the per-
+
+        worker view is the meaningful signal: "is this worker healthy?"
+
+
+        Pairs with /v1/meta/sla (targets) + /v1/meta/incidents (record
+
+        of misses). All three discoverable through /v1/meta/api-info.
+
+
+        Stability: this is /v1/meta/uptime version 0.1. Keys may evolve.'
+      operationId: uptime_stats_v1_meta_uptime_get
+      parameters:
+      - name: by_endpoint
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: If true, include per-endpoint breakdown (templated paths only, capped at 200).
+          default: false
+          title: By Endpoint
+        description: If true, include per-endpoint breakdown (templated paths only, capped at 200).
+      - name: sort_by
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'When by_endpoint=true: sort by ''5xx'' (default; descending), ''total'' (descending), or ''path'' (alphabetical).'
+          default: 5xx
+          title: Sort By
+        description: 'When by_endpoint=true: sort by ''5xx'' (default; descending), ''total'' (descending), or ''path'' (alphabetical).'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: 'When by_endpoint=true: cap on number of endpoints in response.'
+          default: 50
+          title: Limit
+        description: 'When by_endpoint=true: cap on number of endpoints in response.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Metadata
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

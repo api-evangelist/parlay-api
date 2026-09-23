@@ -1,0 +1,444 @@
+openapi: 3.2.0
+info:
+  title: Parlay Sandbox API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Sandbox
+  description: Auth-less deterministic responses for integration testing without credits.
+paths:
+  /v1/sandbox/sports:
+    get:
+      summary: Sandbox Sports
+      description: 'Fake /v1/sports response. Same shape as real endpoint, deterministic.
+
+        No auth, IP rate-limited.'
+      operationId: sandbox_sports_v1_sandbox_sports_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/odds:
+    get:
+      summary: Sandbox Odds
+      description: 'Fake /v1/sports/{sport_key}/odds response. Returns 3 synthetic
+
+        games for the requested sport. Real /v1/odds will return the actual
+
+        games for that sport, including 0 if none are scheduled.'
+      operationId: sandbox_odds_v1_sandbox_sports__sport_key__odds_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: regions
+        in: query
+        required: false
+        schema:
+          type: string
+          default: us
+          title: Regions
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          default: h2h
+          title: Markets
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmakers
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/props:
+    get:
+      summary: Sandbox Props
+      description: 'Sandbox player-prop response. Returns deterministic synthetic
+
+        prop rows for the requested sport so integrators can verify parsing
+
+        of the real /v1/sports/{sport_key}/props shape without spending
+
+        credits.
+
+
+        No auth. IP rate-limited at 60 req/min. iter_042 #354.'
+      operationId: sandbox_props_v1_sandbox_sports__sport_key__props_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: CSV of prop market keys
+          title: Markets
+        description: 'CSV of prop market keys Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: CSV of book keys (filter applied to output)
+          title: Bookmakers
+        description: 'CSV of book keys (filter applied to output) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/live/period_markets:
+    get:
+      summary: Sandbox Period Markets
+      description: 'Fake period markets response. Useful for verifying the period
+
+        markets integration shape.'
+      operationId: sandbox_period_markets_v1_sandbox_sports__sport_key__live_period_markets_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: period
+        in: query
+        required: false
+        schema:
+          type: string
+          default: all
+          title: Period
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/live/sse:
+    get:
+      summary: Sandbox Sse
+      description: 'Fake SSE stream. Pushes a synthetic state-change event every 3
+
+        seconds so prospects can verify SSE integration before paying.
+
+        Self-terminates after 30 events to bound resource use.'
+      operationId: sandbox_sse_v1_sandbox_sports__sport_key__live_sse_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/arbitrage:
+    get:
+      summary: Sandbox Arbitrage
+      description: 'Sandbox arbitrage response. Deterministic synthetic 2-side
+
+        cross-book arbs. iter_068 #491.'
+      operationId: sandbox_arbitrage_v1_sandbox_sports__sport_key__arbitrage_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/ev:
+    get:
+      summary: Sandbox Ev
+      description: 'Sandbox +EV response. iter_068 #491.'
+      operationId: sandbox_ev_v1_sandbox_sports__sport_key__ev_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/consensus:
+    get:
+      summary: Sandbox Consensus
+      description: 'Sandbox consensus response. iter_068 #491.'
+      operationId: sandbox_consensus_v1_sandbox_sports__sport_key__consensus_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/futures:
+    get:
+      summary: Sandbox Futures
+      description: 'Sandbox futures response. iter_068 #491.'
+      operationId: sandbox_futures_v1_sandbox_sports__sport_key__futures_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/scores:
+    get:
+      summary: Sandbox Scores
+      description: 'Sandbox scores response. iter_068 #491.'
+      operationId: sandbox_scores_v1_sandbox_sports__sport_key__scores_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+  /v1/sandbox/sports/{sport_key}/events:
+    get:
+      summary: Sandbox Events
+      description: 'Sandbox events response. iter_068 #491.'
+      operationId: sandbox_events_v1_sandbox_sports__sport_key__events_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sandbox
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

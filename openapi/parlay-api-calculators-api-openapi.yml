@@ -1,0 +1,602 @@
+openapi: 3.2.0
+info:
+  title: Parlay Calculators API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Calculators
+  description: Parlay pricing, CLV grading, Kelly / hedge / edge / free-bet math.
+paths:
+  /v1/calc/kelly:
+    get:
+      summary: Calc Kelly
+      description: 'Fractional Kelly stake. FREE. iter-75 deploy / #456.
+
+
+        Returns the optimal stake size given a bankroll, the price you can
+
+        bet at, your estimated win probability, and a fraction-of-Kelly
+
+        multiplier (most bettors use 0.25-0.5 Kelly to avoid overbetting
+
+        on noisy win-prob estimates).
+
+
+        `expected_value_usd` is the +EV in dollars (positive means the bet
+
+        is +EV at your win_prob; negative means -EV). If the Kelly stake
+
+        is negative, the math says don''t bet.'
+      operationId: calc_kelly_v1_calc_kelly_get
+      parameters:
+      - name: bankroll
+        in: query
+        required: true
+        schema:
+          type: number
+          exclusiveMinimum: 0
+          description: Total bankroll in USD
+          title: Bankroll
+        description: Total bankroll in USD
+      - name: odds
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Bet price (American or decimal, e.g. '-110' or '1.91')
+          title: Odds
+        description: Bet price (American or decimal, e.g. '-110' or '1.91')
+      - name: win_prob
+        in: query
+        required: true
+        schema:
+          type: number
+          exclusiveMaximum: 1
+          exclusiveMinimum: 0
+          description: Your estimated win probability (0 < p < 1)
+          title: Win Prob
+        description: Your estimated win probability (0 < p < 1)
+      - name: fraction
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 1.0
+          exclusiveMinimum: 0
+          description: Kelly fraction multiplier (0.25 = quarter Kelly)
+          default: 0.25
+          title: Fraction
+        description: Kelly fraction multiplier (0.25 = quarter Kelly)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Calculators
+  /v1/calc/hedge:
+    get:
+      summary: Calc Hedge
+      description: 'Compute the hedge stake. FREE. iter-75 deploy / #456.
+
+
+        Two-outcome hedge against an existing position. `original_stake` is
+
+        what you placed on side A at `original_odds`. `hedge_odds` is what
+
+        the OTHER side is currently quoted at. Returns the hedge stake +
+
+        profit-if-A-wins and profit-if-B-wins.'
+      operationId: calc_hedge_v1_calc_hedge_get
+      parameters:
+      - name: original_stake
+        in: query
+        required: true
+        schema:
+          type: number
+          exclusiveMinimum: 0
+          description: Stake you already placed
+          title: Original Stake
+        description: Stake you already placed
+      - name: original_odds
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Odds you took (American or decimal)
+          title: Original Odds
+        description: Odds you took (American or decimal)
+      - name: hedge_odds
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Current available odds on the other side
+          title: Hedge Odds
+        description: Current available odds on the other side
+      - name: target
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'One of: equal_profit (lock in identical profit either side), guaranteed_minimum (max guaranteed return), free_roll (bet just enough to recover original_stake)'
+          default: equal_profit
+          title: Target
+        description: 'One of: equal_profit (lock in identical profit either side), guaranteed_minimum (max guaranteed return), free_roll (bet just enough to recover original_stake)'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Calculators
+  /v1/calc/edge:
+    get:
+      summary: Calc Edge
+      description: '+EV / fair-line / no-vig calculator. FREE. iter-75 deploy / #456.
+
+
+        Two modes:
+
+        1. Pass `true_prob` directly: returns EV vs your stated win prob.
+
+        2. Pass `sharp_over_odds` + `sharp_under_odds`: derives the no-vig
+
+        fair probability from the two-sided sharp market, then computes
+
+        EV against that fair line. This is the canonical EV-scan formula.
+
+
+        `edge_pct` is in percent (positive = +EV).'
+      operationId: calc_edge_v1_calc_edge_get
+      parameters:
+      - name: odds
+        in: query
+        required: true
+        schema:
+          type: string
+          description: The price you can bet at (American or decimal)
+          title: Odds
+        description: The price you can bet at (American or decimal)
+      - name: true_prob
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+            exclusiveMaximum: 1
+            exclusiveMinimum: 0
+          - type: 'null'
+          description: Your estimated true win probability. Either this OR (sharp_over_odds + sharp_under_odds) required.
+          title: True Prob
+        description: Your estimated true win probability. Either this OR (sharp_over_odds + sharp_under_odds) required.
+      - name: sharp_over_odds
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Sharp book's price on the SAME side as `odds`. Used with sharp_under_odds for no-vig fair-line derivation.
+          title: Sharp Over Odds
+        description: Sharp book's price on the SAME side as `odds`. Used with sharp_under_odds for no-vig fair-line derivation.
+      - name: sharp_under_odds
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Sharp book's price on the OPPOSITE side. Used with sharp_over_odds for no-vig.
+          title: Sharp Under Odds
+        description: Sharp book's price on the OPPOSITE side. Used with sharp_over_odds for no-vig.
+      - name: stake
+        in: query
+        required: false
+        schema:
+          type: number
+          exclusiveMinimum: 0
+          description: Stake to compute EV-in-dollars (default $100)
+          default: 100
+          title: Stake
+        description: Stake to compute EV-in-dollars (default $100)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Calculators
+  /v1/calc/free-bet:
+    get:
+      summary: Calc Free Bet
+      description: 'Convert a sportsbook free-bet promo to guaranteed cash. FREE.
+
+        iter-75 deploy / #456.
+
+
+        The free-bet pays out as STAKE-FREE-WINNINGS (the original stake is
+
+        NOT returned). So on a $50 free bet at +200, win → $100 returned
+
+        (not $150). Hedge math accounts for this: hedge_stake = free_bet * b
+
+        where b = bet_odds_decimal - 1.'
+      operationId: calc_free_bet_v1_calc_free_bet_get
+      parameters:
+      - name: free_bet_usd
+        in: query
+        required: true
+        schema:
+          type: number
+          exclusiveMinimum: 0
+          description: Face value of the free bet
+          title: Free Bet Usd
+        description: Face value of the free bet
+      - name: bet_odds
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Odds you'd take on side A using the free bet
+          title: Bet Odds
+        description: Odds you'd take on side A using the free bet
+      - name: hedge_odds
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Odds on side B at a different book for the hedge
+          title: Hedge Odds
+        description: Odds on side B at a different book for the hedge
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Calculators
+  /v1/parlay/verdict:
+    post:
+      summary: Parlay Verdict
+      description: 'Grade a multi-leg parlay in one call. 10 credits.
+
+
+        POST body:
+
+        {"legs": [ {sport, market, side, home, away | team, player, line}, ... ],
+
+        "region"?, "books"?, "book"?, "stake"?, "sharpBook"?}
+
+
+        Returns each leg''s fair-vs-best, the combined no-vig fair price, the single
+
+        BEST BOOK to place the whole parlay at (a real parlay is one slip at one
+
+        book, not best-of-each), the parlay''s EV, the weakest leg, same-game
+
+        correlation warnings, and (with `stake`) the payout. Reuses the /v1/verdict
+
+        engine so single-bet and parlay verdicts agree, and scopes to the books you
+
+        can bet at (region/books, same as /v1/verdict).'
+      operationId: parlay_verdict_v1_parlay_verdict_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Calculators
+  /v1/parlay/price:
+    post:
+      summary: Price Parlay
+      description: 'Combine multiple legs into a parlay and return per-bookmaker
+
+        combined odds. iteration_022 #209: in a product called ParlayAPI,
+
+        callers had to client-side multiply decimal odds across N /odds
+
+        calls themselves; this endpoint does that work server-side.
+
+
+        Cost: 2 credits per leg (min 4).
+
+
+        Request body:
+
+        ```
+
+        {
+
+        "legs": [
+
+        {"sport_key":"basketball_nba","event_id":"",
+
+        "market":"h2h","outcome":"Cleveland Cavaliers"},
+
+        {"sport_key":"soccer_epl","event_id":"",
+
+        "market":"h2h","outcome":"Tottenham Hotspur"},
+
+        {"sport_key":"baseball_mlb","event_id":"",
+
+        "market":"totals","outcome":"Over","point":9.0}
+
+        ],
+
+        "bookmakers": ["fanduel","draftkings","betmgm"]
+
+        }
+
+        ```
+
+        Returns one entry per bookmaker that prices ALL legs, sorted by
+
+        combined decimal odds DESCending (best to worst). Books missing
+
+        even one leg appear in `missing_books` with which legs they couldn''t
+
+        price. SGP flag set when 2+ legs share the same event_id; raw
+
+        multiplication is the LOWER bound for SGP (real books apply a
+
+        correlation discount we don''t replicate).'
+      operationId: price_parlay_v1_parlay_price_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      x-credit-cost-formula: max(4, 2 x len(legs))
+      x-credit-cost-floor: 4
+      x-credit-cost-type: variable
+      x-credit-cost-example: 3-leg parlay = max(4, 6) = 6 credits
+      x-credit-cost-description: Multi-leg parlay pricing
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Calculators
+  /v1/clv:
+    post:
+      summary: Grade Clv
+      description: 'Closing-line-value scoring for a list of bets.
+
+
+        Accepts a bet slip and returns per-bet CLV vs the closing line at a
+
+        sharp book (default pinnacle, falls back to novig if pinnacle didn''t
+
+        price the market). CLV is the +EV-volume bettor''s primary validation
+
+        metric: positive CLV means you beat the closing line, which over a
+
+        large sample size is the most reliable signal that your strategy is
+
+        actually +EV regardless of individual-bet win/loss outcomes.
+
+
+        Cost: 2 credits per bet (min 5).
+
+
+        Request body:
+
+        ```
+
+        {
+
+        "bets": [
+
+        {
+
+        "sport_key": "baseball_mlb",
+
+        "game_date": "2026-05-12",
+
+        "player": "Nico Hoerner", // omit for game-line bets
+
+        "home_team": "Atlanta Braves", // required for game-line bets
+
+        "away_team": "Chicago Cubs",
+
+        "market": "player_runs", // or h2h, spreads, totals
+
+        "outcome": "over", // over/under for props/totals;
+
+        // team name for h2h/spreads
+
+        "line": 0.5, // null for h2h
+
+        "taken_odds": -110, // your fill in American odds
+
+        "taken_at": "2026-05-12T18:00:00Z" // optional
+
+        }
+
+        ],
+
+        "sharp_book": "pinnacle" // optional; defaults to pinnacle
+
+        }
+
+        ```
+
+
+        Response: per-bet `clv_cents`, `clv_pct`, no-vig adjusted CLV when both
+
+        sides have a closing price, plus a `summary` with aggregate stats.'
+      operationId: grade_clv_v1_clv_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      x-credit-cost-formula: max(5, 2 x len(bets))
+      x-credit-cost-floor: 5
+      x-credit-cost-type: variable
+      x-credit-cost-example: 10-bet batch = max(5, 20) = 20 credits
+      x-credit-cost-description: Closing-line-value batch grader
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Calculators
+  /v1/clv/history:
+    post:
+      summary: Clv History
+      description: 'Batch CLV history grader with date-range + period-market coverage.
+
+
+        Body:
+
+        ```
+
+        {
+
+        "bets": [, ...], # same shape as /v1/clv
+
+        "date_from": "YYYY-MM-DD", # optional, inclusive
+
+        "date_to": "YYYY-MM-DD", # optional, inclusive
+
+        "sharp_book": "pinnacle", # optional, default pinnacle
+
+        "include_period_archive": false, # optional, default false
+
+        "period_key": "Q1", # required when include_period_archive
+
+        # AND any bet''s market is a period market
+
+        }
+
+        ```
+
+
+        Cost: max(15, 10 + 3 * len(bets)).
+
+
+        Gated by `CLV_HISTORY_ENABLED=1`. Default OFF; returns 503
+
+        with explanatory body when disabled.'
+      operationId: clv_history_v1_clv_history_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      x-credit-cost-formula: max(15, 10 + 3 x len(bets))
+      x-credit-cost-floor: 15
+      x-credit-cost-type: variable
+      x-credit-cost-example: 50-bet history grade = max(15, 160) = 160 credits
+      x-credit-cost-description: Batch CLV grader with date-range + period-market coverage
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Calculators
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

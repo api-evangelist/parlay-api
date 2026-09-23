@@ -1,0 +1,366 @@
+openapi: 3.2.0
+info:
+  title: Parlay Discovery API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Discovery
+  description: Enumerate supported sports, bookmakers, market keys, and regions.
+paths:
+  /v1/sports:
+    get:
+      summary: List Sports
+      description: 'List available sports. FREE, no credits charged, no API key required.
+
+
+        Returns every sport key we serve, including MLB, NFL, NBA, WNBA, NHL, MLS,
+
+        MMA, Boxing, Cricket, horse racing, disc golf,
+
+        esports, volleyball, table tennis, and the full soccer catalog.
+
+
+        Soccer sport keys follow the pattern: soccer_epl, soccer_germany_bundesliga, etc.
+
+
+        sleep_iter_46 #544: ETag + If-None-Match support. The sport list is
+
+        pre-warmed at module import and is bytewise-stable per worker, so
+
+        304 round-trips save the full response body for polling clients.
+
+        Cache 1h.'
+      operationId: list_sports_v1_sports_get
+      parameters:
+      - name: all
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include inactive sports
+          default: false
+          title: All
+        description: Include inactive sports
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Discovery
+  /v1/regions:
+    get:
+      summary: List Regions
+      description: 'List supported `regions` filter values used by /v1/sports/{key}/odds.
+
+        Public, no auth, no credits. iter_062 #474.
+
+
+        sleep_iter_22 #521: emits ETag + supports If-None-Match.'
+      operationId: list_regions_v1_regions_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Discovery
+  /v1/markets:
+    get:
+      summary: List Markets
+      description: 'List supported `markets` filter values across the API.
+
+        Public, no auth, no credits. iter_062 #474.
+
+
+        The market_key vocabulary is large (60+ values) and grows over the
+
+        season as books add new prop markets. This endpoint returns the
+
+        current canonical set used by /odds, /props, /ev, /consensus, and
+
+        /parlay/price.
+
+
+        sleep_iter_22 #521: emits ETag + supports If-None-Match.'
+      operationId: list_markets_v1_markets_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Discovery
+  /v1/bookmakers:
+    get:
+      summary: List Bookmakers
+      description: 'List supported bookmakers with their integration status.
+
+
+        Status values. These are INTEGRATION states, not liveness readings:
+
+        active Wired up and served on the endpoints listed.
+
+        merged Brand merged into another active bookmaker (see merged_into).
+
+        decommissioned Bookmaker shut down or no longer publicly accessible.
+
+        not_yet_integrated Known book we haven''t wired up yet.
+
+        suppressed A key we publish but serve on no endpoint.
+
+        retired Operator closed. Not served on any live endpoint;
+
+        its closing-line archive stays queryable on the
+
+        historical endpoints (see the note).
+
+
+        `active` says the book is integrated, not that it is writing rows this
+
+        minute. Whether a book is flowing is computed from the data by
+
+        GET /v1/bookmakers/{key}/freshness (`is_live`) and by
+
+        GET /v1/meta/book-catalog (`live`, `rows_24h`). An active book that is
+
+        not currently producing carries a `note` saying so; read the note before
+
+        building a filter around a single book.
+
+
+        Defaults to only active books. Pass ?all=true to see merged / decommissioned
+
+        entries plus the explanation note for each.
+
+
+        By default each book carries an `endpoints` array (game_lines / live /
+
+        props / prediction / event_markets / historical) plus `example_paths`
+
+        showing how to query it. Pass `?include_endpoints=false` for the lean
+
+        catalog without those.
+
+
+        sleep_iter_22 #521: emits ETag + supports If-None-Match. Registry
+
+        changes only on code edit (new book wired up; status flip).'
+      operationId: list_bookmakers_v1_bookmakers_get
+      parameters:
+      - name: all
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include non-active (merged/decommissioned) entries
+          default: false
+          title: All
+        description: Include non-active (merged/decommissioned) entries
+      - name: include_endpoints
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Attach endpoints[] + example_paths per book. Set false for the lean catalog.
+          default: true
+          title: Include Endpoints
+        description: Attach endpoints[] + example_paths per book. Set false for the lean catalog.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Discovery
+  /v1/bookmakers/{key}:
+    get:
+      summary: Get Bookmaker
+      description: 'Return one bookmaker''s catalog entry with endpoints + example URLs.
+
+
+        Returns 404 with the full active list if `key` is unknown so callers
+
+        can recover by suggestion.'
+      operationId: get_bookmaker_v1_bookmakers__key__get
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Discovery
+  /v1/bookmakers/{key}/freshness:
+    get:
+      summary: Get Bookmaker Freshness
+      description: 'Live data-freshness diagnostic for one book.
+
+
+        Returns the most recent timestamp this book wrote into each backing
+
+        table, plus row counts in the last hour and 24 hours. Useful when
+
+        callers want to verify "is this book actually flowing" without
+
+        polling /odds and /props themselves.
+
+
+        Tables checked:
+
+        odds_snapshots (game-line h2h/spreads/totals)
+
+        prop_snapshots (player props + prediction markets)
+
+        period_odds_snapshots (1H, Q1-Q4, halves, etc.)
+
+
+        Free, no auth, no credits charged. Intended for status pages and
+
+        customer health checks.'
+      operationId: get_bookmaker_freshness_v1_bookmakers__key__freshness_get
+      parameters:
+      - name: key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Discovery
+  /v1/pinnacle-coverage:
+    get:
+      summary: Pinnacle Coverage
+      description: '**Public, no-auth.** Pinnacle presence/absence per sport_key.
+
+
+        For every sport we track, shows whether Pinnacle has fresh prices
+
+        and how stale the latest capture is. Use this to verify Pinnacle
+
+        is actually live for the sports you''re betting before committing
+
+        to a backtest or arb pipeline that anchors on Pinnacle.
+
+
+        Cached 5 min. iter_049 #424.'
+      operationId: pinnacle_coverage_v1_pinnacle_coverage_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Discovery
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

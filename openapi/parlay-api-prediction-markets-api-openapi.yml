@@ -1,0 +1,220 @@
+openapi: 3.2.0
+info:
+  title: Parlay Prediction Markets API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Prediction Markets
+  description: Kalshi and Polymarket prediction-market prices including crypto.
+paths:
+  /v1/prediction-markets/{sport_key}:
+    get:
+      summary: Get Prediction Markets
+      description: 'Get prediction-market prices (Kalshi + Polymarket). 1 credit.
+
+
+        Returns one row per (source, market) snapshot from the last hour.
+
+        EXCLUSIVE: not available on the-odds-api.
+
+
+        Use ?sources=kalshi or ?sources=polymarket to limit to one venue.
+
+        For free-text discovery across Kalshi, Polymarket, and Novig (no
+
+        credit charge), use /v1/event-markets/search instead.
+
+
+        Responses are cached server-side for 30s; the `X-Cache` header is
+
+        `HIT` or `MISS` so clients can see whether they hit Postgres.'
+      operationId: get_prediction_markets_v1_prediction_markets__sport_key__get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: sources
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Comma-separated source keys. Supports kalshi, polymarket. Defaults to both.
+          default: kalshi,polymarket
+          title: Sources
+        description: Comma-separated source keys. Supports kalshi, polymarket. Defaults to both.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Kalshi + Polymarket prediction markets for a sport
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Prediction Markets
+  /v1/prediction-markets/crypto/{asset}:
+    get:
+      summary: Get Crypto Prediction Markets
+      description: 'Latest snapshot of every open Kalshi crypto prediction market
+
+        for the requested asset.
+
+
+        What is currently collected is BTC price ladders: `price_at_or_above`
+
+        (one contract per strike, e.g. `KXBTCD-26AUG0117-T53499.99`, "Bitcoin
+
+        price on Aug 1, 2026?") and `price_range`. ETH is in the archive but
+
+        stopped writing on 2026-07-30, so it is served by the historical
+
+        endpoint and not by this one. Ask for a combination outside the window
+
+        this endpoint queries and you get a 404 naming what is live, with no
+
+        credit charged, rather than a billed empty array.
+
+
+        Each row shows the latest yes/no bid/ask + mid-market implied
+
+        probability + volume + open interest. Use the historical endpoint
+
+        (`/v1/historical/prediction-markets/crypto/{asset}`) for replay, and
+
+        for any asset that is in the archive but not currently live.
+
+
+        Cost: 1 credit. Refreshes within ~5s of the underlying collector
+
+        poll.'
+      operationId: get_crypto_prediction_markets_v1_prediction_markets_crypto__asset__get
+      parameters:
+      - name: asset
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Asset
+      - name: market_type
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Filter by market_type. One of: direction_15m, direction_1h, direction_daily, price_range, price_above, all. Default all.'
+          default: all
+          title: Market Type
+        description: 'Filter by market_type. One of: direction_15m, direction_1h, direction_daily, price_range, price_above, all. Default all.'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 200
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Kalshi crypto prediction markets (BTC/ETH/SOL)
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Prediction Markets
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

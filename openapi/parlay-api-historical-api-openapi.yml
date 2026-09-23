@@ -1,0 +1,1431 @@
+openapi: 3.2.0
+info:
+  title: Parlay Historical API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Historical
+  description: Historical odds archive (game closing lines from 2005), closing lines, and period markets.
+paths:
+  /v1/historical/sports/{sport_key}/period_markets:
+    get:
+      summary: Historical Period Markets
+      description: 'Durable per-distinct-state archive of period market line movement.
+
+
+        Each row is one (match_id, source, period_key, market, side, line,
+
+        price) state with `first_seen_ms` (when the book first wrote that
+
+        state) and `last_seen_ms` (the latest poll that re-confirmed it).
+
+
+        Replaying movement: order by first_seen_ms within a (match, period,
+
+        market, side) group; consecutive distinct line / price values are
+
+        the moves. The same archive feeds both pre-game and in-play movement,
+
+        so a Q3 line that opens at 55.5, drops to 54.5 mid-game, and closes
+
+        at 53.5 produces three rows.
+
+
+        Tier gating: 5 credits per call (mirrors /historical/closing-odds).
+
+
+        apiKey is optional as a query param because the key may equally be
+
+        sent as X-API-Key or Authorization: Bearer; see the module docstring.'
+      operationId: historical_period_markets_v1_historical_sports__sport_key__period_markets_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: period
+        in: query
+        required: false
+        schema:
+          type: string
+          description: FT / 1H / 2H / Q1-Q4 / OT / P1-P3 or 'all'
+          default: all
+          title: Period
+        description: FT / 1H / 2H / Q1-Q4 / OT / P1-P3 or 'all'
+      - name: match_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional source-native match id
+          title: Match Id
+        description: Optional source-native match id
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional book filter
+          title: Source
+        description: Optional book filter
+      - name: market
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional market filter (spread/total/h2h)
+          title: Market
+        description: Optional market filter (spread/total/h2h)
+      - name: home_team
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by home team substring
+          title: Home Team
+        description: Filter by home team substring
+      - name: away_team
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by away team substring
+          title: Away Team
+        description: Filter by away team substring
+      - name: date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Specific date YYYY-MM-DD (shortcut for dateFrom=dateTo=date)
+          title: Date
+        description: Specific date YYYY-MM-DD (shortcut for dateFrom=dateTo=date)
+      - name: dateFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: YYYY-MM-DD inclusive
+          title: Datefrom
+        description: YYYY-MM-DD inclusive
+      - name: dateTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: YYYY-MM-DD inclusive
+          title: Dateto
+        description: YYYY-MM-DD inclusive
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 20000
+          minimum: 1
+          default: 5000
+          title: Limit
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Historical period odds archive
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/sports/{sport_key}/odds:
+    get:
+      summary: Get Historical Odds
+      description: 'Get historical odds at a point in time.
+
+
+        Credits: 10 × billable markets × regions. This archive holds moneyline,
+
+        spread and total columns and nothing else, so `h2h`, `spreads` and
+
+        `totals` are the only keys that can be billed here. `outrights`, the
+
+        alt ladder and every prop key are accepted, return nothing from this
+
+        archive, cost zero, and come back named in `x-markets-unservable` with
+
+        the archive endpoint that does hold them in
+
+        `x-markets-served-elsewhere` (prop history is
+
+        `/v1/historical/sports/{sport_key}/closing-odds?markets=`; period
+
+        history is `/v1/historical/sports/{sport_key}/period_markets`).
+
+
+        iter_058 #463 — `date=` vs `dateFrom=&dateTo=` return different rows
+
+        for the same date. The single-date path (`?date=YYYY-MM-DD`) reads
+
+        from the long-term archive and includes the `_an` "anchored"
+
+        closing-line variants (e.g. `draftkings_an`, `fanduel_an`,
+
+        `bet365_an`) alongside the regular bookmaker rows. The range path
+
+        (`?dateFrom=...&dateTo=...`) reads from the rolling snapshot table
+
+        and surfaces only the bare bookmaker keys (without `_an`).
+
+        For consistent backtest joins, prefer `?date=` when you need
+
+        closing-line anchors. See /v1/bookmakers/{key}.historical_variants
+
+        for the suffix convention.
+
+
+        `date` omitted returns the latest snapshot (equivalent to current
+
+        /v1/sports/{sport_key}/odds but routed through the historical
+
+        pricing). This matches the UX of /closing-odds which doesn''t
+
+        require an explicit date either - removes the 422-on-missing-param
+
+        trap that customers hit when they don''t read the schema first.'
+      operationId: get_historical_odds_v1_historical_sports__sport_key__odds_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: ISO 8601 timestamp OR YYYY-MM-DD date. Omit to get the most recent snapshot. See doc note below for behavior.
+          title: Date
+        description: ISO 8601 timestamp OR YYYY-MM-DD date. Omit to get the most recent snapshot. See doc note below for behavior.
+      - name: regions
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Comma-separated: us,us2,uk,eu,au. Default us.'
+          default: us
+          title: Regions
+        description: 'Comma-separated: us,us2,uk,eu,au. Default us. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Comma-separated: h2h,spreads,totals. Default h2h. Those three are the whole servable list here; any other key is answered but billed zero and routed by the x-markets-served-elsewhere header.'
+          default: h2h
+          title: Markets
+        description: 'Comma-separated: h2h,spreads,totals. Default h2h. Those three are the whole servable list here; any other key is answered but billed zero and routed by the x-markets-served-elsewhere header. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: decimal
+          title: Oddsformat
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost-formula: 10 x len(markets) x len(regions)
+      x-credit-cost-floor: 10
+      x-credit-cost-type: variable
+      x-credit-cost-example: ?markets=h2h&regions=us = 10x1x1 = 10 credits
+      x-credit-cost-description: Historical odds (10x markup over live odds)
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/sports/{sport_key}/matches:
+    get:
+      summary: Get Historical Matches
+      description: 'Historical match/result archive.
+
+
+        Use this when a source has real historical match data but not historical
+
+        prices. Rows with actual odds include `has_odds=true` and an `odds` object.'
+      operationId: get_historical_matches_v1_historical_sports__sport_key__matches_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Shortcut for dateFrom=dateTo=date (YYYY-MM-DD)
+          title: Date
+        description: Shortcut for dateFrom=dateTo=date (YYYY-MM-DD)
+      - name: dateFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Start date YYYY-MM-DD
+          title: Datefrom
+        description: Start date YYYY-MM-DD
+      - name: dateTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: End date YYYY-MM-DD
+          title: Dateto
+        description: End date YYYY-MM-DD
+      - name: sources
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated sources, e.g. hltv,opendota,vlrgg,pinnacle
+          title: Sources
+        description: Comma-separated sources, e.g. hltv,opendota,vlrgg,pinnacle
+      - name: pricedOnly
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Only rows that include real odds/prices
+          default: false
+          title: Pricedonly
+        description: Only rows that include real odds/prices
+      - name: includeRaw
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include raw source payload
+          default: false
+          title: Includeraw
+        description: Include raw source payload
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 5000
+          minimum: 1
+          default: 1000
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 2
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Historical match/result archive
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/sports/{sport_key}/coverage:
+    get:
+      summary: Get Historical Coverage
+      description: 'Per-source row count for historical-matches in a window.
+
+
+        Answers "before I burn credits filtering, which sources have actual
+
+        data for this sport over this date range, and how deep does each
+
+        one go?" Useful for esports where some sources (HLTV for CS2)
+
+        carry years of match results while others (Pinnacle for CS2)
+
+        only go back a few weeks.
+
+
+        Cost: 1 credit. Returns:
+
+
+        {
+
+        "sport_key": "esports_cs2",
+
+        "window": {"date_from": "...", "date_to": "..."},
+
+        "by_source": {
+
+        "hltv": {"rows": 15379, "first_date": "2025-01-03",
+
+        "last_date": "2026-05-07", "priced_rows": 0},
+
+        "pinnacle": {"rows": 50, "first_date": "2026-05-01",
+
+        "last_date": "2026-05-11", "priced_rows": 50},
+
+        ...
+
+        },
+
+        "_note": "..."
+
+        }
+
+
+        All dates are ISO YYYY-MM-DD. Sources with zero rows in the window
+
+        are omitted.'
+      operationId: get_historical_coverage_v1_historical_sports__sport_key__coverage_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: dateFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Start date YYYY-MM-DD
+          title: Datefrom
+        description: Start date YYYY-MM-DD
+      - name: dateTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: End date YYYY-MM-DD
+          title: Dateto
+        description: End date YYYY-MM-DD
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Per-source row count for historical matches
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/prediction-markets/crypto/{asset}:
+    get:
+      summary: Get Crypto Prediction Markets Historical
+      description: 'Tick-by-tick replay of Kalshi crypto prediction markets.
+
+
+        Every poll snapshot we captured is preserved here. The collector
+
+        polls each open market every ~5 s, so a one-hour replay returns
+
+        ~720 rows per market.
+
+
+        The archive runs from 2026-05-13 and holds two assets: BTC
+
+        (`price_at_or_above`, `price_range`) and ETH (`price_at_or_above`,
+
+        `other`). ETH is reachable here even though it is no longer live.
+
+        A combination we have never carried returns 404 with no credit
+
+        charged; a range we simply have no rows for returns an empty
+
+        `snapshots` array, because coverage is measured over the archive and
+
+        not over your requested window. Provide `market_ticker` to focus on
+
+        one resolution slot.
+
+
+        Cost: 2 credits. Replay depth is bounded by your plan''s historical
+
+        window; an explicit `from` before it returns 403 HISTORICAL_LIMIT.'
+      operationId: get_crypto_prediction_markets_historical_v1_historical_prediction_markets_crypto__asset__get
+      parameters:
+      - name: asset
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Asset
+      - name: market_type
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Same as live endpoint: direction_15m / direction_1h / direction_daily / price_range / price_above / all'
+          default: all
+          title: Market Type
+        description: 'Same as live endpoint: direction_15m / direction_1h / direction_daily / price_range / price_above / all'
+      - name: market_ticker
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Replay a single Kalshi market_ticker (e.g. KXBTCD-26MAY13H1515).
+          title: Market Ticker
+        description: Replay a single Kalshi market_ticker (e.g. KXBTCD-26MAY13H1515).
+      - name: from
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Start timestamp (unix ms). Defaults to 6 hours ago.
+          title: From
+        description: Start timestamp (unix ms). Defaults to 6 hours ago.
+      - name: to
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: End timestamp (unix ms). Defaults to now.
+          title: To
+        description: End timestamp (unix ms). Defaults to now.
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          default: 2000
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 2
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Historical Kalshi crypto market snapshots
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/sports/{sport_key}/closing-odds:
+    get:
+      summary: Get Historical Closing Odds
+      description: 'Historical closing lines: game-line h2h/spreads/totals plus player props.'
+      operationId: get_historical_closing_odds_v1_historical_sports__sport_key__closing_odds_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Comma-separated. Game lines: h2h, spreads, totals. Player props: player_strikeouts, player_total_bases, player_points, player_rebounds, player_assists, player_pass_yds, player_rush_yds, player_shots_on_goal, etc. (any market_key from prop_closing_lines). Mix freely: markets=h2h,player_strikeouts.'
+          default: h2h
+          title: Markets
+        description: 'Comma-separated. Game lines: h2h, spreads, totals. Player props: player_strikeouts, player_total_bases, player_points, player_rebounds, player_assists, player_pass_yds, player_rush_yds, player_shots_on_goal, etc. (any market_key from prop_closing_lines). Mix freely: markets=h2h,player_strikeouts. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated. Game-line queries default to pinnacle. Prop-only queries default to all tracked books.
+          title: Bookmakers
+        description: 'Comma-separated. Game-line queries default to pinnacle. Prop-only queries default to all tracked books. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: season
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Season filter for game lines (e.g. 2023-24)
+          title: Season
+        description: Season filter for game lines (e.g. 2023-24)
+      - name: date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Specific date YYYY-MM-DD (shortcut for dateFrom=dateTo=date)
+          title: Date
+        description: Specific date YYYY-MM-DD (shortcut for dateFrom=dateTo=date)
+      - name: dateFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Start date (YYYY-MM-DD)
+          title: Datefrom
+        description: Start date (YYYY-MM-DD)
+      - name: dateTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: End date (YYYY-MM-DD)
+          title: Dateto
+        description: End date (YYYY-MM-DD)
+      - name: player
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter props to a specific player name (substring match)
+          title: Player
+        description: Filter props to a specific player name (substring match)
+      - name: include_imports
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Also include rows you've imported via POST /v1/historical/closing-lines/import
+          default: false
+          title: Include Imports
+        description: Also include rows you've imported via POST /v1/historical/closing-lines/import
+      - name: limit
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 5000
+            minimum: 1
+          - type: 'null'
+          description: Rows per PUBLIC leg (game lines, props) for this page, 1..5000. Omit for the full row cap, which is exactly the behaviour this endpoint had before paging existed.
+          title: Limit
+        description: Rows per PUBLIC leg (game lines, props) for this page, 1..5000. Omit for the full row cap, which is exactly the behaviour this endpoint had before paging existed.
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          description: Rows to skip in each PUBLIC leg. Use with the same limit to read past the row cap, including the case where one game_date fills a whole page and dateTo paging cannot advance. Both public legs are ordered on a unique key, so offset paging neither skips nor repeats rows.
+          default: 0
+          title: Offset
+        description: Rows to skip in each PUBLIC leg. Use with the same limit to read past the row cap, including the case where one game_date fills a whole page and dateTo paging cannot advance. Both public legs are ordered on a unique key, so offset paging neither skips nor repeats rows.
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 10
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Historical closing-line archive
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/closing-lines/import:
+    post:
+      summary: Import Customer Closing Lines
+      description: 'Bring-your-own historical closing lines (Pro tier+).
+
+
+        Stores rows in a per-customer namespace (customer_imported_closing_lines
+
+        table, isolated by your api_key). **The public historical archive
+
+        (historical_odds) is read-only via this endpoint** — you can only
+
+        see / delete YOUR OWN imports. Other customers'' imports are
+
+        invisible to you and yours to them.
+
+
+        Query your imports back through the standard
+
+        `GET /v1/historical/sports/{sport_key}/closing-odds?include_imports=true`
+
+        endpoint.
+
+
+        Cost: 1 credit per 1,000 rows submitted (rounded up).
+
+        Idempotent: re-submitting the same row is a no-op via ON CONFLICT DO NOTHING.
+
+
+        Tier gate: Pro+ (iteration_019 #197 — free-tier was accepted at
+
+        auth but the use case is paid-customer-only, so we gate explicitly).
+
+
+        Example body:
+
+
+        ```
+
+        [
+
+        {
+
+        "game_date": "2025-08-15",
+
+        "sport_key": "baseball_mlb",
+
+        "home_team": "Detroit Tigers",
+
+        "away_team": "Texas Rangers",
+
+        "source": "fanduel",
+
+        "player_name": "Tarik Skubal",
+
+        "market_key": "player_strikeouts",
+
+        "line": 7.5,
+
+        "over_price": -118,
+
+        "under_price": -102
+
+        }
+
+        ]
+
+        ```'
+      operationId: import_customer_closing_lines_v1_historical_closing_lines_import_post
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                type: object
+                additionalProperties: true
+              description: 'Array of closing-line rows. Each row must have at minimum: game_date (YYYY-MM-DD), sport_key, home_team, away_team, source, market_key, line. Optional: commence_time, player_name, market_label, over_price, under_price, raw_json.'
+              title: Rows
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost-formula: ceil(rows / 1000)
+      x-credit-cost-floor: 1
+      x-credit-cost-type: variable
+      x-credit-cost-example: 5000-row import = 5 credits
+      x-credit-cost-description: Bring-your-own historical close lines
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+    delete:
+      summary: Delete Customer Closing Imports
+      description: 'Delete YOUR OWN imported closing-line rows.
+
+
+        Scoped to the customer_imported_closing_lines table, filtered by
+
+        your api_key — this endpoint **cannot touch the public historical
+
+        archive** (historical_odds is read-only via the API).
+
+
+        Without `sport_key`, deletes every row YOU''VE imported. With it,
+
+        only your rows for that sport. Always requires `confirm=true`.
+
+
+        Tier gate: Pro+ (matches the import sibling — iteration_019 #198).'
+      operationId: delete_customer_closing_imports_v1_historical_closing_lines_import_delete
+      parameters:
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to a sport_key (optional)
+          title: Sport Key
+        description: Filter to a sport_key (optional)
+      - name: confirm
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Must be true to actually delete
+          default: false
+          title: Confirm
+        description: Must be true to actually delete
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Historical
+  /v1/historical/coverage:
+    get:
+      summary: Historical Coverage
+      description: '**Public, no-auth.** Cross-source historical odds coverage stats:
+
+        total rows, span, sources per sport, score-coverage percentage.
+
+        Use this to verify the archive is rich enough for your backtest
+
+        before committing to a paid tier.
+
+
+        Cached 5 min with stale-while-revalidate (single-flight refresh).
+
+        iter_13 #501.'
+      operationId: historical_coverage_v1_historical_coverage_get
+      parameters:
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter the by_sport array + summary to a single sport. iter_062 #476.'
+          title: Sport Key
+        description: 'Filter the by_sport array + summary to a single sport. iter_062 #476.'
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter the by_source array + summary to a single source. iter_062 #476.'
+          title: Source
+        description: 'Filter the by_source array + summary to a single source. iter_062 #476.'
+      - name: min_rows
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            minimum: 1
+          - type: 'null'
+          description: 'Drop by_sport / by_source entries with fewer than this many rows. iter_062 #476.'
+          title: Min Rows
+        description: 'Drop by_sport / by_source entries with fewer than this many rows. iter_062 #476.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Historical
+  /v1/historical/stats:
+    get:
+      summary: Get Historical Stats
+      description: Public endpoint. Stats about our historical odds archive.
+      operationId: get_historical_stats_v1_historical_stats_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Historical
+  /v1/historical/source-quality.csv:
+    get:
+      summary: Historical Source Quality Csv
+      description: 'Historical per-source observation rate, hourly buckets. Public, no
+
+        auth, no credits.
+
+
+        Returns one row per (hour_bucket, source, table_name) triple with
+
+        the observed row count and the latest observation timestamp inside
+
+        the bucket. This is the historical companion to
+
+        /v1/meta/source-quality (which only shows the live snapshot).
+
+
+        Useful for SLA validation: did Pinnacle actually maintain its
+
+        declared freshness yesterday? Did the FanDuel ingest dip during the
+
+        Sunday-noon NFL kickoff window?
+
+
+        Memory rule compliance: read-only on metadata. No prices touched.'
+      operationId: historical_source_quality_csv_v1_historical_source_quality_csv_get
+      parameters:
+      - name: hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 720
+          minimum: 1
+          description: Window in hours, 1 to 720 (max 30 days).
+          default: 24
+          title: Hours
+        description: Window in hours, 1 to 720 (max 30 days).
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional source filter (e.g. pinnacle, draftkings).
+          title: Source
+        description: Optional source filter (e.g. pinnacle, draftkings).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Historical
+  /v1/historical/source-quality.json:
+    get:
+      summary: Historical Source Quality Json
+      description: 'JSON variant of /v1/historical/source-quality.csv.
+
+
+        Same data, same hourly bucketing, structured as JSON for
+
+        programmatic consumers that prefer JSON parsing over CSV. Public,
+
+        no auth, no credits. 5-min server-side cache.
+
+
+        Response shape:
+
+        {
+
+        "as_of": "...",
+
+        "window_hours": N,
+
+        "source_filter": "..." or null,
+
+        "row_count": M,
+
+        "rows": [
+
+        {"bucket_start_utc": "...", "source": "...",
+
+        "table_name": "...", "rows_seen": N,
+
+        "latest_observation_utc": "..."},
+
+        ...
+
+        ]
+
+        }'
+      operationId: historical_source_quality_json_v1_historical_source_quality_json_get
+      parameters:
+      - name: hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 720
+          minimum: 1
+          description: Window in hours, 1 to 720 (max 30 days).
+          default: 24
+          title: Hours
+        description: Window in hours, 1 to 720 (max 30 days).
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional source filter (e.g. pinnacle, draftkings).
+          title: Source
+        description: Optional source filter (e.g. pinnacle, draftkings).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Historical
+  /v1/historical/closing-lines.json:
+    get:
+      summary: Closing Lines Json
+      description: 'JSON variant of /v1/historical/closing-lines.csv. Same data,
+
+        same 6-hour server cache, structured as JSON for programmatic
+
+        consumers that prefer JSON parsing over CSV.
+
+
+        Metered: 1 credit per 1,000 rows delivered, minimum 1 credit.
+
+        The response carries X-Export-Rows, X-Export-Credits and
+
+        X-Export-Rate so the cost of a call is always visible. Rows are
+
+        counted as DELIVERED, not as requested, so a wide limit on a thin
+
+        slate costs only what it returns.
+
+
+        Response shape:
+
+        {
+
+        "as_of": "...",
+
+        "date": "YYYY-MM-DD",
+
+        "filters": {"sport_key": "...", "source": "...", "limit": N},
+
+        "row_count": N,
+
+        "rows": [
+
+        {"game_date":"...","sport_key":"...","commence_time":"...",
+
+        "home_team":"...","away_team":"...","source":"...",
+
+        "player_name":"...","market_key":"...","market_label":"...",
+
+        "line":N,"over_price":N,"under_price":N,
+
+        "over_implied_prob":N,"under_implied_prob":N,
+
+        "snapshot_time":"..."},
+
+        ...
+
+        ]
+
+        }
+
+
+        A row from a retired book (an operator that has closed; see
+
+        RETIRED_SOURCES) additionally carries "retired": true and "closed_on".
+
+
+        Memory rule compliance: every row comes from prop_closing_lines,
+
+        which only carries observed closing snapshots. We never synthesize
+
+        a closing price.'
+      operationId: closing_lines_json_v1_historical_closing_lines_json_get
+      parameters:
+      - name: date
+        in: query
+        required: true
+        schema:
+          type: string
+          description: YYYY-MM-DD (UTC). One day per request.
+          title: Date
+        description: YYYY-MM-DD (UTC). One day per request.
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional sport_key filter.
+          title: Sport Key
+        description: Optional sport_key filter.
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional source filter (e.g. pinnacle, draftkings).
+          title: Source
+        description: Optional source filter (e.g. pinnacle, draftkings).
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500000
+          minimum: 1
+          default: 50000
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Daily closing-line JSON download (cached 6h)
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+  /v1/historical/closing-lines.csv:
+    get:
+      summary: Closing Lines Csv
+      description: 'Daily closing-line dump in CSV.
+
+
+        Metered: 1 credit per 1,000 rows delivered, minimum 1 credit.
+
+        The response carries X-Export-Rows, X-Export-Credits and
+
+        X-Export-Rate so the cost of a call is always visible. Rows are
+
+        counted as DELIVERED, not as requested, so a wide limit on a thin
+
+        slate costs only what it returns.
+
+
+        Returns one row per (game_date, home_team, away_team, player_name,
+
+        market_key, line, source) tuple for the requested date. The natural
+
+        key is enforced by a unique constraint on prop_closing_lines so
+
+        duplicate rows are impossible; each row is the latest-snapshot
+
+        archive for that prop close.
+
+
+        Designed for backtesters who want a flat-file daily snapshot
+
+        rather than the JSON shape of /v1/sports/{sport_key}/closing-lines.
+
+
+        Headers: text/csv; Content-Disposition attachment named by date.
+
+        Stream-safe for large windows up to limit=500000 rows.
+
+
+        The two trailing columns, `retired` and `closed_on`, are filled only
+
+        on rows from a retired book (an operator that has closed; see
+
+        RETIRED_SOURCES) and empty everywhere else, so the JSON twin and this
+
+        file say the same thing about the same row.
+
+
+        Memory rule compliance: every row comes from prop_closing_lines,
+
+        which only carries observed closing snapshots. We never synthesize
+
+        a closing price.'
+      operationId: closing_lines_csv_v1_historical_closing_lines_csv_get
+      parameters:
+      - name: date
+        in: query
+        required: true
+        schema:
+          type: string
+          description: YYYY-MM-DD (UTC). One day per request.
+          title: Date
+        description: YYYY-MM-DD (UTC). One day per request.
+      - name: sport_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional sport_key filter.
+          title: Sport Key
+        description: Optional sport_key filter.
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional source filter (e.g. pinnacle, draftkings).
+          title: Source
+        description: Optional source filter (e.g. pinnacle, draftkings).
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500000
+          minimum: 1
+          default: 50000
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Daily closing-line CSV download (cached 6h)
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Historical
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

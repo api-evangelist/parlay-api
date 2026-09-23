@@ -1,0 +1,119 @@
+openapi: 3.2.0
+info:
+  title: Parlay Account API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Account
+paths:
+  /v1/account:
+    get:
+      summary: Get Usage
+      description: 'Check your API usage and remaining credits.
+
+
+        /v1/account is the path the published MCP server calls (tool
+
+        parlayapi_account_info, mcp-server/parlayapi_mcp/server.py:273).
+
+        Aliasing it to /v1/usage so the MCP tool doesn''t 404 (#040).
+
+
+        Pass `?by_endpoint=true` to get a per-endpoint breakdown of
+
+        credit usage in the current period (iter_060 #469).'
+      operationId: get_usage_v1_account_get
+      parameters:
+      - name: by_endpoint
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: 'Include a per-endpoint credit-usage breakdown for the current billing period. iter_060 #469: customers asked for ''where did my credits go this month''. Off by default so the response stays lean.'
+          default: false
+          title: By Endpoint
+        description: 'Include a per-endpoint credit-usage breakdown for the current billing period. iter_060 #469: customers asked for ''where did my credits go this month''. Off by default so the response stays lean.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Account
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

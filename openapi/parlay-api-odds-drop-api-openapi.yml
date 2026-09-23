@@ -1,0 +1,219 @@
+openapi: 3.2.0
+info:
+  title: Parlay Odds Drop API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Odds Drop
+paths:
+  /v1/odds-drop/{sport_key}:
+    get:
+      summary: Sse Odds Drop
+      description: 'Business+ tier SSE endpoint that filters the broadcast stream to
+
+        line-MOVES only. Customer configures a threshold (in American-odds
+
+        cents) and we push an event the moment a tracked side crosses it.
+
+
+        Each event has shape:
+
+        data: {"type":"odds_drop","event_id":"...","bookmaker":"...",
+
+        "side":"h2h_home","prev":-110,"new":-120,"delta":-10,
+
+        "direction":"toward_favorite","timestamp":1747...}\n\n
+
+
+        Single-sport subscription:
+
+        GET /v1/odds-drop/baseball_mlb?apiKey=...
+
+
+        Multi-sport subscription (one connection, many sport_keys):
+
+        GET /v1/odds-drop/all?apiKey=...
+
+        GET /v1/odds-drop/multi?apiKey=...&sports=baseball_mlb,basketball_nba
+
+
+        The wildcard ''all'' value subscribes to every sport_key with broadcast
+
+        activity in the last 5 minutes (~100-200 sport keys at peak). Drops
+
+        include a `sport_key` field so you can route them downstream.'
+      operationId: sse_odds_drop_v1_odds_drop__sport_key__get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs; browser EventSource cannot set headers, so this stays supported.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs; browser EventSource cannot set headers, so this stays supported.
+      - name: threshold
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Minimum American-odds delta to trigger an event. Default 10 (a -110 becoming -120, or +100 becoming +110).
+          default: 10
+          title: Threshold
+        description: Minimum American-odds delta to trigger an event. Default 10 (a -110 becoming -120, or +100 becoming +110).
+      - name: event_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Optional: filter to one game''s event_id'
+          title: Event Id
+        description: 'Optional: filter to one game''s event_id'
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated books
+          title: Bookmakers
+        description: 'Comma-separated books Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated market keys
+          title: Markets
+        description: 'Comma-separated market keys Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: sports
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated sport_keys for multi-sport subscription. Overrides path sport_key. Use 'all' as a sentinel to subscribe to every sport_key with recent activity (last 5 min).
+          title: Sports
+        description: Comma-separated sport_keys for multi-sport subscription. Overrides path sport_key. Use 'all' as a sentinel to subscribe to every sport_key with recent activity (last 5 min).
+      - name: direction
+        in: query
+        required: false
+        schema:
+          type: string
+          description: both | toward_favorite | toward_dog. Filter by which way the line moved.
+          default: both
+          title: Direction
+        description: both | toward_favorite | toward_dog. Filter by which way the line moved.
+      - name: heartbeat_s
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 30
+          minimum: 1
+          default: 5
+          title: Heartbeat S
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Odds Drop
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

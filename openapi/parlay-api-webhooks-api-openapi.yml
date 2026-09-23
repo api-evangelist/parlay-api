@@ -1,0 +1,368 @@
+openapi: 3.2.0
+info:
+  title: Parlay Webhooks API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Webhooks
+paths:
+  /v1/webhooks:
+    get:
+      tags:
+      - Webhooks
+      summary: List Webhooks
+      operationId: list_webhooks_v1_webhooks_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+    post:
+      tags:
+      - Webhooks
+      summary: Create Webhook
+      operationId: create_webhook_v1_webhooks_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookCreate'
+        required: true
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/webhooks/{webhook_id}:
+    patch:
+      tags:
+      - Webhooks
+      summary: Update Webhook
+      operationId: update_webhook_v1_webhooks__webhook_id__patch
+      parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Webhook Id
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WebhookPatch'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    get:
+      tags:
+      - Webhooks
+      summary: Get Webhook
+      description: 'Look up a single webhook config by id. iter_054 #446: was 405.
+
+        Customer who lost the create-time secret can at least re-fetch the
+
+        rest of their config. (Secret itself is NEVER returned again; ours
+
+        is a one-time-show secret per Stripe convention.)'
+      operationId: get_webhook_v1_webhooks__webhook_id__get
+      parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Webhook Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+    delete:
+      tags:
+      - Webhooks
+      summary: Delete Webhook
+      operationId: delete_webhook_v1_webhooks__webhook_id__delete
+      parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Webhook Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/webhooks/{webhook_id}/rotate-secret:
+    post:
+      tags:
+      - Webhooks
+      summary: Rotate Webhook Secret
+      description: 'Generate a new HMAC secret for this webhook. Returns the new
+
+        secret exactly once. Use this when a secret has leaked or on a
+
+        periodic rotation schedule; for config edits without rotation, use
+
+        PATCH instead.'
+      operationId: rotate_webhook_secret_v1_webhooks__webhook_id__rotate_secret_post
+      parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Webhook Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/webhooks/{webhook_id}/deliveries:
+    get:
+      tags:
+      - Webhooks
+      summary: List Webhook Deliveries
+      description: 'List recent delivery attempts for a webhook. iter_054 #446:
+
+        reliability monitoring is the #2 most-requested webhook feature.
+
+        Stores up to ~30 days of delivery history per webhook in the
+
+        webhook_deliveries table; older rows are pruned by the retention
+
+        cleanup.'
+      operationId: list_webhook_deliveries_v1_webhooks__webhook_id__deliveries_get
+      parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Webhook Id
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 50
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Filter: ''success'', ''failed'', or omit for all'
+          title: Status
+        description: 'Filter: ''success'', ''failed'', or omit for all'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/webhooks/{webhook_id}/test:
+    post:
+      tags:
+      - Webhooks
+      summary: Test Webhook
+      description: Fire a `test` event so the customer can verify their endpoint.
+      operationId: test_webhook_v1_webhooks__webhook_id__test_post
+      parameters:
+      - name: webhook_id
+        in: path
+        required: true
+        schema:
+          type: integer
+          title: Webhook Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    WebhookPatch:
+      properties:
+        url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Url
+        events:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Events
+        sport_filter:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Sport Filter
+        is_active:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Is Active
+      type: object
+      title: WebhookPatch
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    WebhookCreate:
+      properties:
+        url:
+          type: string
+          title: Url
+        events:
+          items:
+            type: string
+          type: array
+          title: Events
+        sport_filter:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Sport Filter
+      type: object
+      required:
+      - url
+      - events
+      title: WebhookCreate
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

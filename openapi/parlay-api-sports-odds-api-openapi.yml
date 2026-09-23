@@ -1,0 +1,3401 @@
+openapi: 3.2.0
+info:
+  title: Parlay Sports & Odds API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Sports & Odds
+  description: Game-line and player-prop odds across all books for a sport.
+paths:
+  /v1/sports/{sport_key}/live/sse:
+    get:
+      summary: Sports Live Sse
+      description: 'Server-Sent Events stream of live state changes.
+
+
+        Tier-gated: paid tier (starter+). 5 credits at connection time.'
+      operationId: sports_live_sse_v1_sports__sport_key__live_sse_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: match_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Match ID to subscribe to. Omit or use '*' for all live matches in this sport.
+          title: Match Id
+        description: Match ID to subscribe to. Omit or use '*' for all live matches in this sport.
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Live play-by-play SSE stream connection
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live/points:
+    get:
+      summary: Sports Live Points
+      description: One-shot snapshot of live state. Free tier OK. 1 credit per call.
+      operationId: sports_live_points_v1_sports__sport_key__live_points_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: match_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Match ID. Omit for all currently in-play matches in this sport.
+          title: Match Id
+        description: Match ID. Omit for all currently in-play matches in this sport.
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Live play-by-play state snapshot
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live/book_latency:
+    get:
+      summary: Sports Live Book Latency
+      description: 'Per-book latency for live games in this sport.
+
+
+        For each book (DK / FD / Caesars / BetMGM / Pinnacle / etc.) we
+
+        compute lag_seconds = primary_PBP_age - book_odds_last_update.
+
+        Positive lag means the book is behind reality (their lines might be
+
+        stale; exploit before rebalance).
+
+
+        Use case: arb scanner customers query this every few seconds and
+
+        surface "FD has 8s lag on Yankees-Rangers right now" alerts.
+
+
+        Pro+ tier. 5 credits per call (rich derived data).'
+      operationId: sports_live_book_latency_v1_sports__sport_key__live_book_latency_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Per-book lag relative to live game state
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live/source-health:
+    get:
+      summary: Sports Live Source Health
+      description: 'Customer-facing source-freshness diagnostic.
+
+
+        Returns per-source freshness for the requested sport: which feeds
+
+        are emitting events, when they last did, and how many events landed
+
+        in the last 5 minutes. Use this to detect when a source goes stale
+
+        so your bot doesn''t trade on dead data.
+
+
+        Response shape (one row per source actively emitting for this sport):
+
+        [
+
+        {
+
+        "sport_key": "basketball_nba",
+
+        "source": "nba_live",
+
+        "role": "primary",
+
+        "events_last_5min": 142,
+
+        "seconds_since_last_event": 3.2,
+
+        "latest_capture_ms": 1778214028111
+
+        },
+
+        ...
+
+        ]
+
+
+        Free tier OK. 1 credit per call. Recommended polling cadence: every
+
+        30 seconds. If a source you care about shows seconds_since_last_event
+
+        > 60 during a known-live game, that source has gone stale; failover
+
+        to another source or the league-API path.
+
+
+        **Empty-when-healthy semantics** (iter_064 #479): the pbp_source_health
+
+        table is populated by the source-health monitor only when a feed
+
+        transitions into a degraded state (slow / silent / errored). A
+
+        response of `{count: 0, results: []}` means every tracked source
+
+        for the sport is firing within its expected cadence. Treat empty
+
+        as a positive signal, not a missing-data signal. To verify the
+
+        underlying source is actually live, cross-reference
+
+        `/live/api/data_flow` which always returns the per-source pulse
+
+        snapshot.'
+      operationId: sports_live_source_health_v1_sports__sport_key__live_source_health_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Per-sport live source freshness diagnostic
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live/period_markets:
+    get:
+      summary: Sports Live Period Markets
+      description: 'Return latest period market lines for a sport.
+
+
+        Open to all tiers. 2 credits per call.
+
+
+        The apiKey query param above is declared OPTIONAL on purpose. It used
+
+        to be `Query(...)`, which made FastAPI 422 "Field required" before
+
+        this body ever ran whenever a customer sent the key the way docs.html
+
+        recommends (X-API-Key header) or as Authorization: Bearer. Leaving it
+
+        optional lets require_api_key below resolve all three forms, with
+
+        headers beating query so an appended &apiKey= cannot clobber a key
+
+        sent securely.'
+      operationId: sports_live_period_markets_v1_sports__sport_key__live_period_markets_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: period
+        in: query
+        required: false
+        schema:
+          type: string
+          description: FT / 1H / 2H / Q1 / Q2 / Q3 / Q4 / OT or 'all'
+          default: all
+          title: Period
+        description: FT / 1H / 2H / Q1 / Q2 / Q3 / Q4 / OT or 'all'
+      - name: match_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional source-native match id
+          title: Match Id
+        description: Optional source-native match id
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional book filter
+          title: Source
+        description: Optional book filter
+      - name: market
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional market filter (spread/total/h2h)
+          title: Market
+        description: Optional market filter (spread/total/h2h)
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 2
+      x-credit-cost-type: fixed
+      x-credit-cost-description: In-game period spreads, totals, and h2h
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live/disagreement:
+    get:
+      summary: Sports Live Disagreement
+      description: 'Cross-book disagreement diagnostic for in-play markets.
+
+
+        Returns one row per (match, period, market, side) with each book''s
+
+        latest line + price plus deviation from a chosen anchor (median or
+
+        Pinnacle). Use this to find +EV opportunities during fast scoring
+
+        runs where soft books haven''t caught up to sharp lines yet.
+
+
+        Tier gate: Pro+. 5 credits per call.
+
+
+        Example response (basketball_nba Q3 total):
+
+        {
+
+        "sport_key": "basketball_nba",
+
+        "period": "Q3",
+
+        "market": "total",
+
+        "anchor": "median",
+
+        "as_of_ms": 1778342828915,
+
+        "results": [
+
+        {
+
+        "match_id": "0042500301",
+
+        "home_team": "Lakers", "away_team": "Thunder",
+
+        "side": "over",
+
+        "anchor_line": 51.5,
+
+        "books": [
+
+        {"source": "pinnacle", "line": 51.5, "price": -110,
+
+        "deviation_abs": 0.0, "deviation_pct": 0.0,
+
+        "age_seconds": 2.1},
+
+        {"source": "dk_web", "line": 50.5, "price": -115,
+
+        "deviation_abs": 1.0, "deviation_pct": 0.0194,
+
+        "age_seconds": 1.4}
+
+        ]
+
+        }
+
+        ]
+
+        }
+
+
+        Filter on `deviation_pct > 0.02` client-side to surface the actually
+
+        actionable disagreements (anything within median noise gets dropped).
+
+
+        apiKey is optional as a query param because the key may equally be
+
+        sent as X-API-Key or Authorization: Bearer; see the module docstring.'
+      operationId: sports_live_disagreement_v1_sports__sport_key__live_disagreement_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: period
+        in: query
+        required: false
+        schema:
+          type: string
+          description: FT / 1H / 2H / Q1-Q4 / OT / P1-P3 / F5 / F7 or 'all'
+          default: all
+          title: Period
+        description: FT / 1H / 2H / Q1-Q4 / OT / P1-P3 / F5 / F7 or 'all'
+      - name: market
+        in: query
+        required: false
+        schema:
+          type: string
+          description: spread / total / h2h
+          default: total
+          title: Market
+        description: spread / total / h2h
+      - name: side
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional side filter (over/under for total, home/away for spread/h2h). Omit to get all sides per book.
+          title: Side
+        description: Optional side filter (over/under for total, home/away for spread/h2h). Omit to get all sides per book.
+      - name: anchor
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Reference for deviation: ''median'' (across all books) or ''pinnacle'''
+          default: median
+          title: Anchor
+        description: 'Reference for deviation: ''median'' (across all books) or ''pinnacle'''
+      - name: max_age_s
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 300
+          minimum: 1
+          description: Drop books whose latest observation is older than this many seconds. Default 90s catches Bovada's slower polling cycle alongside Pinnacle's tight one. Lower it for stricter freshness, raise it for sparse periods (deep Q4, OT).
+          default: 90
+          title: Max Age S
+        description: Drop books whose latest observation is older than this many seconds. Default 90s catches Bovada's slower polling cycle alongside Pinnacle's tight one. Lower it for stricter freshness, raise it for sparse periods (deep Q4, OT).
+      - name: min_books
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10
+          minimum: 1
+          description: Minimum number of books required to emit a row. Default 2 because rows with n_books=1 can't be disagreeing with anyone (max_deviation_pct=0 always). Pass 1 to also see markets where only one book has a recent quote (useful for diagnosing which books are slow to refresh).
+          default: 2
+          title: Min Books
+        description: Minimum number of books required to emit a row. Default 2 because rows with n_books=1 can't be disagreeing with anyone (max_deviation_pct=0 always). Pass 1 to also see markets where only one book has a recent quote (useful for diagnosing which books are slow to refresh).
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Cross-book in-play line disagreement
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live/period_markets/sources:
+    get:
+      summary: Sports Live Period Sources
+      description: 'List which books currently have period markets for this sport.
+
+
+        Open to all tiers. 1 credit per call.
+
+
+        apiKey is optional as a query param because the key may equally be
+
+        sent as X-API-Key or Authorization: Bearer; see the module docstring.'
+      operationId: sports_live_period_sources_v1_sports__sport_key__live_period_markets_sources_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: List books with period data for a sport
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/injuries:
+    get:
+      summary: Sports Injuries
+      description: 'Return current injury records for a sport.
+
+
+        Data source: ESPN''s public core API, refreshed by the collector
+
+        every ~10 minutes. Includes status, IL category, body part, side,
+
+        expected return date, and short comment.
+
+
+        Sports supported: baseball_mlb, basketball_nba, basketball_wnba,
+
+        icehockey_nhl, americanfootball_nfl. Other sport_keys return 400.
+
+
+        Open to all tiers. 1 credit per call.'
+      operationId: sports_injuries_v1_sports__sport_key__injuries_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: athlete
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional case-insensitive substring match on athlete name
+          title: Athlete
+        description: Optional case-insensitive substring match on athlete name
+      - name: status
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional filter on ESPN status string (e.g. '15-Day-IL')
+          title: Status
+        description: Optional filter on ESPN status string (e.g. '15-Day-IL')
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: ESPN injury records for a sport
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/injuries/{athlete_name}:
+    get:
+      summary: Injury Lookup
+      description: 'Single-athlete injury lookup. Exact name match (case-insensitive
+
+        on the input; the cache key is ESPN''s `fullName`).
+
+
+        Returns 404 if athlete is not in the injury cache (which usually
+
+        means they are NOT injured, but could also mean they''re not yet
+
+        rostered or the collector hasn''t seen them).
+
+
+        1 credit per call.'
+      operationId: injury_lookup_v1_sports__sport_key__injuries__athlete_name__get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: athlete_name
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Athlete Name
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Single-athlete injury lookup
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/news:
+    get:
+      summary: Sports News
+      description: 'Recent ESPN news headlines for a sport.
+
+
+        Useful for tagging prop_snapshots with game-state context: rain
+
+        delays, lineup changes, scratched players. The collector refreshes
+
+        every 5 min from ESPN''s public news feed.
+
+
+        Open to all tiers. 1 credit per call.'
+      operationId: sports_news_v1_sports__sport_key__news_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: since_hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 168
+          minimum: 1
+          description: Look-back window in hours
+          default: 24
+          title: Since Hours
+        description: Look-back window in hours
+      - name: keyword
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional case-insensitive headline substring match
+          title: Keyword
+        description: Optional case-insensitive headline substring match
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 200
+          minimum: 1
+          description: Max articles to return
+          default: 50
+          title: Limit
+        description: Max articles to return
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: ESPN news headlines for a sport
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/baseball_mlb/probable-pitchers:
+    get:
+      summary: Mlb Probable Pitchers
+      description: 'List today''s (and next 2 days'') MLB probable starting pitchers.
+
+
+        Each game returns home/away probable pitcher names and IDs, the
+
+        venue, scheduled game time (UTC), and game status. Pitcher IDs
+
+        are MLB''s canonical Person IDs from Stats API.
+
+
+        Sourced from MLB Stats API (statsapi.mlb.com) — official, free,
+
+        no auth. Refreshed hourly.
+
+
+        Open to all tiers. 1 credit per call.'
+      operationId: mlb_probable_pitchers_v1_sports_baseball_mlb_probable_pitchers_get
+      parameters:
+      - name: date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'YYYY-MM-DD. Default: all upcoming dates in cache (~3 days)'
+          title: Date
+        description: 'YYYY-MM-DD. Default: all upcoming dates in cache (~3 days)'
+      - name: apiKey
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+          title: Apikey
+        description: API key. Prefer the X-API-Key header, which keeps the key out of URLs and logs.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Today's + next 2 days MLB probable starting pitchers
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/middles:
+    get:
+      summary: Find Middles
+      description: 'Find middle opportunities across bookmakers. 3 credits.
+
+
+        A *middle* is when you bet the Over at a low line on one book and the Under
+
+        at a higher line on another, so there is a window of whole numbers where
+
+        BOTH bets cash. Example: Over 7.5 runs at DraftKings and Under 9.5 at
+
+        FanDuel; if the game lands on 8 or 9, both tickets win, otherwise you win
+
+        one and lose the other for a small net cost (the vig).
+
+
+        Unlike arbitrage (guaranteed profit), a middle is a small known cost for a
+
+        shot at a large payout when the result lands in the window. This scans
+
+        every over/under market with a numeric line, so it covers game totals,
+
+        spreads, AND player-total props (points, rebounds, strikeouts, ...).
+
+
+        Each result carries the window, the exact numbers that hit, the payout if
+
+        it hits (per $100 on each leg), and the net cost if it misses above or
+
+        below the window, so you can size the play yourself. Sorted widest-window
+
+        first (best chance the result lands in the middle).
+
+
+        **Example:** `GET /v1/sports/baseball_mlb/middles?min_gap=1`'
+      operationId: find_middles_v1_sports__sport_key__middles_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: min_gap
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 50.0
+          minimum: 0.0
+          description: Minimum middle-window width in points/runs/goals (default 1.0). A middle needs at least one whole number strictly inside the window to cash both sides, so 1.0 is the practical floor.
+          default: 1.0
+          title: Min Gap
+        description: Minimum middle-window width in points/runs/goals (default 1.0). A middle needs at least one whole number strictly inside the window to cash both sides, so 1.0 is the practical floor.
+      - name: min_books
+        in: query
+        required: false
+        schema:
+          type: integer
+          minimum: 1
+          description: Minimum distinct books across the group (default 2).
+          default: 2
+          title: Min Books
+        description: Minimum distinct books across the group (default 2).
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: CSV of market_keys to limit the scan (e.g. markets=totals for game totals only, or markets=player_points). Omit to scan game totals, spreads, AND player-total props.
+          title: Markets
+        description: 'CSV of market_keys to limit the scan (e.g. markets=totals for game totals only, or markets=player_points). Omit to scan game totals, spreads, AND player-total props. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: include_props
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include player-total props (points, strikeouts, ...) alongside game totals + spreads. Default true.
+          default: true
+          title: Include Props
+        description: Include player-total props (points, strikeouts, ...) alongside game totals + spreads. Default true.
+      - name: max_width
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 50.0
+          minimum: 0.0
+          description: Optional cap on window width. 0 (default) = no cap. Useful to hide implausibly wide 'middles' that pair a main line with a deep, stale alternate line.
+          default: 0.0
+          title: Max Width
+        description: Optional cap on window width. 0 (default) = no cap. Useful to hide implausibly wide 'middles' that pair a main line with a deep, stale alternate line.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 3
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Cross-book middle opportunities
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/best-bets:
+    get:
+      summary: Best Bets
+      description: 'The bets worth making right now, ranked. 10 credits.
+
+
+        The discovery half of the verdict: instead of grading a bet you name, this
+
+        scans the sport''s board, grades every candidate with the same no-vig engine
+
+        as /v1/verdict, keeps only bets that are +EV at a book YOU can bet at, and
+
+        ranks them by edge. Also returns `edge_alerts` (books showing a price far
+
+        off the market, to grab fast or verify). Region/books/prefs aware.'
+      operationId: best_bets_v1_sports__sport_key__best_bets_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: region
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Where you can bet: us (default) | eu | uk | au | ca.'
+          title: Region
+        description: 'Where you can bet: us (default) | eu | uk | au | ca.'
+      - name: books
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Exact CSV of books you can bet at (overrides region).
+          title: Books
+        description: Exact CSV of books you can bet at (overrides region).
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          description: Max plays to return.
+          default: 20
+          title: Limit
+        description: Max plays to return.
+      - name: min_edge
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 30.0
+          minimum: 0.0
+          description: Minimum edge %% vs the no-vig fair line.
+          default: 2.0
+          title: Min Edge
+        description: Minimum edge %% vs the no-vig fair line.
+      - name: min_books
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 20
+          minimum: 2
+          description: Minimum books pricing a play (higher = more reliable).
+          default: 4
+          title: Min Books
+        description: Minimum books pricing a play (higher = more reliable).
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional CSV of market_keys to restrict the scan.
+          title: Markets
+        description: 'Optional CSV of market_keys to restrict the scan. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/events:
+    get:
+      summary: List Events
+      description: List upcoming events. FREE - no credits charged.
+      operationId: list_events_v1_sports__sport_key__events_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: dateFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: iso
+          title: Dateformat
+      - name: eventIds
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated event IDs
+          title: Eventids
+        description: Comma-separated event IDs
+      - name: commenceTimeFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commencetimefrom
+      - name: commenceTimeTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commencetimeto
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/participants:
+    get:
+      summary: List Participants
+      description: List teams or players for a sport in TOA participant shape. 1 credit.
+      operationId: list_participants_v1_sports__sport_key__participants_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 1
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Team or player roster for a sport
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/events/canonical:
+    get:
+      summary: List Canonical Events
+      description: 'List events grouped by canonical ID across ALL sources.
+
+
+        Each canonical event shows which sources have it and links their source-specific
+
+        event IDs + team name variations. Useful for joining data across books.
+
+
+        Credits: 2'
+      operationId: list_canonical_events_v1_sports__sport_key__events_canonical_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 2
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Events grouped by canonical ID across sources
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/odds:
+    get:
+      summary: Get Odds
+      description: 'Get odds for upcoming and live events.
+
+
+        Credits: markets_count x regions_count (same formula as the-odds-api).
+
+
+        **Every sport key in GET /v1/sports is supported**, including every soccer
+
+        competition in that list, esports, and volleyball.
+
+
+        **Regions:** us, us2, uk, eu, fr, au, ca, mx, latam, br, asia. Use eu for Pinnacle and European bookmakers.
+
+
+        **Markets:** h2h (moneyline/3-way), spreads, totals, alternate_spreads,
+
+        alternate_totals, outrights, and player_* / batter_* / pitcher_* /
+
+        anytime_* / futures_* prop keys. That list is the WHOLE list this
+
+        endpoint can return.
+
+
+        **Markets served elsewhere are not billed here.** A key this endpoint
+
+        cannot emit is still accepted and the request is still answered (a
+
+        valid derived market never 400s here, so a migrating client''s pipeline
+
+        is never aborted), but it is dropped from the `markets x regions`
+
+        multiplier and costs nothing. The period keys (`h2h_1st_half`,
+
+        `spreads_1st_half`, `totals_1st_half`, `h2h_1st_quarter`,
+
+        `h2h_1st_period`, `h2h_1st_5_innings`, `spreads_1st_5_innings`,
+
+        `totals_1st_5_innings`) are served by
+
+        `/v1/sports/{sport_key}/live/period_markets?period=1H&market=h2h` and
+
+        `/v1/historical/sports/{sport_key}/period_markets`. Team totals, BTTS,
+
+        correct score, double chance, draw-no-bet and the racing keys are
+
+        served by `/v1/sports/{sport_key}/props?markets=`. Until
+
+        2026-09-05 /odds billed markets x regions for all of them and dropped
+
+        them from the response (ticket #295).
+
+
+        **What you were billed for.** Every charged response carries
+
+        `x-markets-served`, the market keys the charge covered. A servable key
+
+        with no book pricing it right now still costs a credit and still
+
+        appears there: that is coverage, not a gap. Keys we cannot serve here
+
+        are listed in `x-markets-unservable` (billed zero) and routed by
+
+        `x-markets-served-elsewhere`.
+
+
+        **Filter by bookmaker:** `?bookmakers=pinnacle,draftkings`
+
+
+        **Live only:** `?live=true` returns events that have already started (same
+
+        cost as a normal call, no extra charge). For a dedicated in-play endpoint
+
+        that exposes live-tagged player props alongside game lines, see
+
+        `/v1/sports/{sport_key}/live`.
+
+
+        **Shape tokens:** `?include=slim` drops `raw_json` from any row that
+
+        carries one. `?include=raw` returns the identifying fields plus the
+
+        `bookmakers` tree and `raw_json`, dropping derived fields
+
+        (`canonical_event_id`, `sport_title`, `probable_pitchers`,
+
+        `starting_lineups`). Events on this endpoint do not currently carry a
+
+        `raw_json` field, so `slim` returns the same fields as `normalized` here
+
+        and `raw` differs from `normalized` only by the derived fields it drops.
+
+
+        **Verified-at signal:** every bookmaker''s `last_update` is the freshest of
+
+        (price-change, no-change verification heartbeat). On hot-cycle sources
+
+        (Pinnacle, FanDuel) that means a maximum age around the 2-second poll
+
+        interval, even if the price hasn''t moved. Add `?include=verification` to
+
+        also receive:
+
+        - `verified_at`: the heartbeat timestamp (we polled and saw the same price)
+
+        - `line_changed_at`: the last actual price-move timestamp
+
+        - `is_current`: true iff verified_at is within the last 5 seconds
+
+
+        Combine with shape tokens, e.g. `?include=slim,verification`.
+
+
+        **Example:** `GET /v1/sports/soccer_epl/odds?regions=eu&markets=h2h,spreads&bookmakers=pinnacle`'
+      operationId: get_odds_v1_sports__sport_key__odds_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: regions
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Comma-separated: us,us2,uk,eu,au. Default ''us''. iter_047 #420: was previously required (...). Made optional with ''us'' default so consumers running pre-existing The-Odds-API-style code (which defaulted to us) don''t 422.'
+          default: us
+          title: Regions
+        description: 'Comma-separated: us,us2,uk,eu,au. Default ''us''. iter_047 #420: was previously required (...). Made optional with ''us'' default so consumers running pre-existing The-Odds-API-style code (which defaulted to us) don''t 422. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Comma-separated. Servable here: h2h, spreads, totals, alternate_spreads, alternate_totals, outrights, and any player_*/batter_*/pitcher_*/anytime_*/futures_* prop key. Any other key is still accepted and still answered, but it is NOT billed and returns nothing here: period keys (h2h_1st_half, totals_1st_5_innings, ...) belong to /v1/sports/{sport_key}/live/period_markets. The response says which keys were billed (x-markets-served), which were not (x-markets-unservable) and where those are served (x-markets-served-elsewhere).'
+          default: h2h
+          title: Markets
+        description: 'Comma-separated. Servable here: h2h, spreads, totals, alternate_spreads, alternate_totals, outrights, and any player_*/batter_*/pitcher_*/anytime_*/futures_* prop key. Any other key is still accepted and still answered, but it is NOT billed and returns nothing here: period keys (h2h_1st_half, totals_1st_5_innings, ...) belong to /v1/sports/{sport_key}/live/period_markets. The response says which keys were billed (x-markets-served), which were not (x-markets-unservable) and where those are served (x-markets-served-elsewhere). Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: decimal
+          title: Oddsformat
+      - name: dateFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: iso
+          title: Dateformat
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated bookmaker keys (overrides regions)
+          title: Bookmakers
+        description: 'Comma-separated bookmaker keys (overrides regions) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: eventIds
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated event IDs
+          title: Eventids
+        description: Comma-separated event IDs
+      - name: commenceTimeFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commencetimefrom
+      - name: commenceTimeTo
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Commencetimeto
+      - name: date
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Shortcut: events whose commence_time falls on this UTC date (YYYY-MM-DD). Sugar for commenceTimeFrom=<date>T00:00:00Z and commenceTimeTo=<date>T23:59:59Z. Explicit commenceTime* values win.'
+          title: Date
+        description: 'Shortcut: events whose commence_time falls on this UTC date (YYYY-MM-DD). Sugar for commenceTimeFrom=<date>T00:00:00Z and commenceTimeTo=<date>T23:59:59Z. Explicit commenceTime* values win.'
+      - name: include
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'Comma-separated. Shape tokens: normalized (default, every field we build), slim (drops raw_json from any row that carries one), raw (the identifying fields plus the bookmakers tree and raw_json, dropping derived fields such as canonical_event_id, sport_title, probable_pitchers and starting_lineups). Events on this endpoint do not currently carry a raw_json field, so slim returns the same fields as normalized here and raw differs only by the derived fields it drops. Add ''verification'' to include verified_at, line_changed_at, and is_current per bookmaker.'
+          default: normalized
+          title: Include
+        description: 'Comma-separated. Shape tokens: normalized (default, every field we build), slim (drops raw_json from any row that carries one), raw (the identifying fields plus the bookmakers tree and raw_json, dropping derived fields such as canonical_event_id, sport_title, probable_pitchers and starting_lineups). Events on this endpoint do not currently carry a raw_json field, so slim returns the same fields as normalized here and raw differs only by the derived fields it drops. Add ''verification'' to include verified_at, line_changed_at, and is_current per bookmaker.'
+      - name: verified
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Alias for include=verification. Adds verified_at, line_changed_at, and is_current per bookmaker.
+          default: false
+          title: Verified
+        description: Alias for include=verification. Adds verified_at, line_changed_at, and is_current per bookmaker.
+      - name: live
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Live games only (commence_time at or before now). Equivalent to passing commenceTimeTo=<now>. No extra cost.
+          default: false
+          title: Live
+        description: Live games only (commence_time at or before now). Equivalent to passing commenceTimeTo=<now>. No extra cost.
+      - name: include_live
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include in-progress games in the response (off by default; /odds is for pregame analysis). Set true to get both pregame and live in one call.
+          default: false
+          title: Include Live
+        description: Include in-progress games in the response (off by default; /odds is for pregame analysis). Set true to get both pregame and live in one call.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost-formula: len(markets) x len(regions)
+      x-credit-cost-floor: 1
+      x-credit-cost-type: variable
+      x-credit-cost-example: ?markets=h2h,spreads&regions=us = 2x1 = 2 credits
+      x-credit-cost-description: Multi-market multi-region odds
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/events/{event_id}/odds:
+    get:
+      summary: Get Event Odds
+      description: Get odds for a single event.
+      operationId: get_event_odds_v1_sports__sport_key__events__event_id__odds_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Event Id
+      - name: regions
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Regions
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          default: h2h
+          title: Markets
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: decimal
+          title: Oddsformat
+      - name: dateFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: iso
+          title: Dateformat
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated bookmaker keys. Overrides regions. Returns only the listed books that have data for this event+market.
+          title: Bookmakers
+        description: 'Comma-separated bookmaker keys. Overrides regions. Returns only the listed books that have data for this event+market. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: include
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Comma-separated. 'verification' adds verified_at / line_changed_at / is_current per bookmaker.
+          default: normalized
+          title: Include
+        description: Comma-separated. 'verification' adds verified_at / line_changed_at / is_current per bookmaker.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost-formula: len(markets) x len(regions)
+      x-credit-cost-floor: 1
+      x-credit-cost-type: variable
+      x-credit-cost-example: ?markets=h2h&regions=us,uk = 1x2 = 2 credits
+      x-credit-cost-description: Single-event odds (deep markets supported)
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/player-ratings:
+    get:
+      summary: Get Player Ratings
+      description: 'Market-implied player ratings derived from PREGAME closing prices.
+
+
+        Supported today for table_tennis (and its sub-leagues), where we hold
+
+        paired 1v1 moneylines from bovada and tenbet.
+
+
+        What the rating is: an iterative ELO fit to the de-vigged implied win
+
+        probability of the LAST price each book posted BEFORE the listed start
+
+        time. That is the market''s pregame estimate of who is stronger.
+
+
+        What it is not:
+
+        - Not an official ITTF or WTT ranking.
+
+        - Not a results based rating. A price quoted at or after first serve
+
+        is an in play price and is excluded, because an in play price
+
+        encodes who is currently ahead, which is close to encoding the
+
+        result. On bovada table tennis, 83 percent of the moneyline rows
+
+        we hold were written after the fixture started, so an endpoint
+
+        that used "the latest price" was reporting results dressed up as
+
+        a market estimate. That was the bug this endpoint used to have.
+
+        - Not a prediction. It summarises market consensus.
+
+
+        Selection rules, all reported back in the response:
+
+        - A fixture is keyed by (home, away, commence_time), so the same two
+
+        players meeting twice in one day is two fixtures, never one.
+
+        - Both sides must have a pregame price or the fixture is dropped.
+
+        - The two implied probabilities must sum to a plausible book total
+
+        (0.98 to 1.30) or the fixture is dropped.
+
+        - One fixture counts once, whatever the number of books pricing it.
+
+        - A book names the side either bare ("Adam Svoboda") or as a
+
+        compound market label ("Adam Svoboda v Vaclav Dolezal · Match
+
+        Winner · Adam Svoboda"); both are read, and the trailing segment
+
+        must equal a side name exactly. Reading only the bare form used
+
+        to exclude every tenbet row and then report those fixtures as
+
+        dropped for having no pregame price, which was a parsing
+
+        exclusion wearing an in-play exclusion''s label. Measured on prod
+
+        2026-09-04 over 30 days of table tennis, reading both forms takes
+
+        usable fixtures from 418 to 8,750.
+
+
+        matches_dropped_inplay_only counts fixtures for which we hold a
+
+        match-winner price named to a side, but every such price was quoted
+
+        at or after the start time. It does not count fixtures we hold no
+
+        match-winner price for at all: those never enter fixtures_seen.
+
+
+        Returns the top `limit` players by rating, descending. Players below
+
+        `min_matches` are excluded as noise.
+
+
+        Cost: 2 credits per call.'
+      operationId: get_player_ratings_v1_sports__sport_key__player_ratings_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          default: 100
+          title: Limit
+      - name: min_matches
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          description: Minimum matches required for a player to appear
+          default: 3
+          title: Min Matches
+        description: Minimum matches required for a player to appear
+      - name: window_days
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 180
+          minimum: 1
+          description: Recency window for source matches
+          default: 30
+          title: Window Days
+        description: Recency window for source matches
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 2
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Market-implied ELO from pregame closing prices (1v1 sports)
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/scores:
+    get:
+      summary: Get Scores
+      description: 'Get live scores and recent results. 1-2 credits.
+
+
+        Covers NHL, NBA, MLB, NFL, MMA/UFC, and major soccer leagues via ESPN.
+
+        Returns live game state, scores, period/quarter/inning, and completion status.
+
+
+        `daysFrom` adds completed games from the last 1-14 days and costs a
+
+        second credit. It is only honoured, and only billed, for sports we can
+
+        actually look back on; ask for it on a sport we hold no score history
+
+        for and you pay the base 1 credit instead of 2.
+
+
+        **Example:** `GET /v1/sports/americanfootball_nfl/scores`'
+      operationId: get_scores_v1_sports__sport_key__scores_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: daysFrom
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 14
+            minimum: 1
+          - type: 'null'
+          description: Days of history (1-14). Costs a second credit, and only on sports we hold score history for; on any other sport it is ignored and you are charged the base 1 credit. For longer windows use the historical endpoints.
+          title: Daysfrom
+        description: Days of history (1-14). Costs a second credit, and only on sports we hold score history for; on any other sport it is ignored and you are charged the base 1 credit. For longer windows use the historical endpoints.
+      - name: dateFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: iso
+          title: Dateformat
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost-formula: 2 if daysFrom and the sport has score history else 1
+      x-credit-cost-floor: 1
+      x-credit-cost-type: variable
+      x-credit-cost-example: ?daysFrom=3 = 2 credits, no daysFrom = 1 credit, ?daysFrom=3 on a sport with no score history = 1 credit
+      x-credit-cost-description: Scores for live and completed games
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/line-movement:
+    get:
+      summary: Get Line Movement
+      description: 'Track how odds move over time for an event. 2 credits.
+
+
+        Returns time-series of odds snapshots for the specified event, showing
+
+        line/price changes across bookmakers. Useful for CLV analysis and
+
+        steam detection.
+
+
+        **Example:** `GET /v1/sports/baseball_mlb/line-movement?eventId=abc123&market=player_hits&player=Aaron Judge`'
+      operationId: get_line_movement_v1_sports__sport_key__line_movement_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: eventId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Eventid
+      - name: event_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Event Id
+      - name: source
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Source
+      - name: bookmaker
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmaker
+      - name: market
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to market_key (e.g. player_points)
+          title: Market
+        description: Filter to market_key (e.g. player_points)
+      - name: market_key
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Alias for market
+          title: Market Key
+        description: Alias for market
+      - name: player
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter to specific player
+          title: Player
+        description: Filter to specific player
+      - name: hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          description: Lookback window in hours (max 168)
+          default: 24
+          title: Hours
+        description: Lookback window in hours (max 168)
+      - name: window_minutes
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Lookback window in minutes (max 10080)
+          title: Window Minutes
+        description: Lookback window in minutes (max 10080)
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 2
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Historical odds movement for an event
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/props:
+    get:
+      summary: Get Props
+      description: 'Get player prop odds from 10+ sources. 3 credits.
+
+
+        Sourced from DraftKings, FanDuel, Caesars, Bovada, Pinnacle, Fliff (real
+
+        American odds), PrizePicks, Underdog, Betr, Pick6, Sleeper, Novig, ProphetX,
+
+        Polymarket (event markets, opt-in via include_event_markets=true).
+
+
+        **Freshness.** Active books are polled every few seconds; the poll cadence
+
+        per source runs ~30-120s depending on the book. This endpoint serves the
+
+        most recent row per book written within the last 60 minutes, so a quiet
+
+        market can return a line several minutes old. Every row (and every entry in
+
+        a grouped `books[]`) carries `age_seconds`, the real age of that write. To
+
+        enforce a tighter window pass `?maxAgeSec=` (e.g. `?maxAgeSec=120` for
+
+        props no older than two minutes); rows past the bound, and rows whose write
+
+        time can''t be parsed, are dropped.
+
+
+        **Supported sports:** NFL, NBA, MLB, NHL, MMA/UFC, Soccer, Tennis, Golf, and more.
+
+
+        **Market keys:** player_points, player_rebounds, player_assists, player_three_pointers,
+
+        player_strikeouts, player_hits, player_home_runs, player_total_bases, player_runs,
+
+        player_rbis, player_goals, player_shots_on_goal, player_pts_rebs_asts, and 50+ more.
+
+
+        **Example:** `GET /v1/sports/basketball_nba/props?markets=player_points,player_rebounds`
+
+
+        **Filter by player:** `?player=LeBron`
+
+
+        **Filter by book:** `?bookmakers=fliff,pinnacle`
+
+
+        **Polymarket / Kalshi event markets:** `?bookmakers=polymarket` (auto-includes
+
+        event markets) or `?include_event_markets=true` (any source). For a dedicated
+
+        prediction-market endpoint with question text + event_url, use
+
+        `/v1/prediction-markets/{sport_key}`.
+
+
+        **Pagination headers** (sleep_iter_7 #508): every response carries
+
+        `x-result-page-size`, `x-result-row-count`, `x-result-limit`,
+
+        `x-result-offset`, `x-result-has-more`. When `x-result-has-more: true`, the
+
+        response also carries `x-next-offset: ` showing the offset to request
+
+        for the next page. Use these to walk a large result set without truncating
+
+        silently. The default limit of 5000 is fine for most queries; a
+
+        full bet365 baseball_mlb response needs ~3 pages of 5000 to retrieve
+
+        all available rows.
+
+
+        **Pagination with `grouped=true`:** `limit` and `offset` count ROWS (one row
+
+        per book) in both modes, so `x-next-offset` means the same thing either way.
+
+        A grouped page therefore returns FEWER entries than `limit` - several rows
+
+        collapse into one prop - and `x-result-page-size` (props returned) will sit
+
+        below `x-result-row-count` (rows behind them). Trust `x-result-has-more`,
+
+        not the entry count, to decide whether to ask for another page. A prop whose
+
+        books straddle a page boundary arrives with a partial `books[]` on each
+
+        page; merge pages on (event_id, player, market_key, line). To avoid that
+
+        entirely, narrow with `?markets=` / `?bookmakers=` so the whole result fits
+
+        in one page.
+
+
+        Returns over/under lines with American odds from each source.'
+      operationId: get_props_v1_sports__sport_key__props_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated prop market keys (e.g. player_pass_yds,player_points)
+          title: Markets
+        description: 'Comma-separated prop market keys (e.g. player_pass_yds,player_points) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated bookmaker keys
+          title: Bookmakers
+        description: 'Comma-separated bookmaker keys Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: player
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by player name (partial match)
+          title: Player
+        description: Filter by player name (partial match)
+      - name: eventId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by event ID
+          title: Eventid
+        description: Filter by event ID
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: dfsOdds
+        in: query
+        required: false
+        schema:
+          type: string
+          description: 'DFS normalization: ''midpoint'' = +100/-100 (default, zero-vig), ''effective'' = per-book implied (PrizePicks/Underdog = -137/-137)'
+          default: midpoint
+          title: Dfsodds
+        description: 'DFS normalization: ''midpoint'' = +100/-100 (default, zero-vig), ''effective'' = per-book implied (PrizePicks/Underdog = -137/-137)'
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          description: Max rows returned (default 5000, max 10000)
+          default: 5000
+          title: Limit
+        description: Max rows returned (default 5000, max 10000)
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 0
+          description: Page offset within the result set. Combine with limit for pagination. For results past 10000 rows, narrow via ?markets= or ?bookmakers= filters instead.
+          default: 0
+          title: Offset
+        description: Page offset within the result set. Combine with limit for pagination. For results past 10000 rows, narrow via ?markets= or ?bookmakers= filters instead.
+      - name: grouped
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Return one entry per prop with a books[] array (recommended) instead of one row per book
+          default: false
+          title: Grouped
+        description: Return one entry per prop with a books[] array (recommended) instead of one row per book
+      - name: include_event_markets
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include futures and prediction-market rows that lack a single home/away_team (Polymarket yes/no questions, Underdog season-longs, etc). Auto-enabled when bookmakers includes 'polymarket'.
+          default: false
+          title: Include Event Markets
+        description: Include futures and prediction-market rows that lack a single home/away_team (Polymarket yes/no questions, Underdog season-longs, etc). Auto-enabled when bookmakers includes 'polymarket'.
+      - name: maxAgeSec
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 3600
+            minimum: 1
+          - type: 'null'
+          description: Only return prop rows written within this many seconds. Every row already carries age_seconds; this drops any older than the bound (and any whose write time can't be parsed). Omit to serve the full recency window (up to 3600s / 60 min).
+          title: Maxagesec
+        description: Only return prop rows written within this many seconds. Every row already carries age_seconds; this drops any older than the bound (and any whose write time can't be parsed). Omit to serve the full recency window (up to 3600s / 60 min).
+      - name: include
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Accepted only as 'normalized', which is what this endpoint already returns. /props serves one shape, so any other token (for example 'raw' or 'slim') is rejected with 400 instead of being ignored. The shape tokens live on GET /v1/sports/{sport_key}/odds.
+          title: Include
+        description: Accepted only as 'normalized', which is what this endpoint already returns. /props serves one shape, so any other token (for example 'raw' or 'slim') is rejected with 400 instead of being ignored. The shape tokens live on GET /v1/sports/{sport_key}/odds.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 3
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Player props for one sport
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/props/coverage:
+    get:
+      summary: Get Props Coverage
+      description: 'Show which fresh books survive the exact /props request filters.
+
+
+        This endpoint is for support diagnostics and does not charge credits.'
+      operationId: get_props_coverage_v1_sports__sport_key__props_coverage_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated prop market keys
+          title: Markets
+        description: 'Comma-separated prop market keys Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Comma-separated bookmaker keys
+          title: Bookmakers
+        description: 'Comma-separated bookmaker keys Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: player
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by player name
+          title: Player
+        description: Filter by player name
+      - name: eventId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by event ID
+          title: Eventid
+        description: Filter by event ID
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: dfsOdds
+        in: query
+        required: false
+        schema:
+          type: string
+          default: midpoint
+          title: Dfsodds
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          default: 5000
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/odds/coverage:
+    get:
+      summary: Get Odds Coverage
+      description: 'Per-book game-line coverage for this sport: which books have fresh
+
+        h2h / spread / total prices, how many games each, and the freshest
+
+        timestamp per book.
+
+
+        Use this before hitting /odds to check whether the books you care
+
+        about are actually live for the sport you''re requesting. Diagnostic
+
+        endpoint, no credit charge.'
+      operationId: get_odds_coverage_v1_sports__sport_key__odds_coverage_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: fresh_within_seconds
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 86400
+          minimum: 60
+          description: Only count books with at least one update within this window.
+          default: 900
+          title: Fresh Within Seconds
+        description: Only count books with at least one update within this window.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/props/markets:
+    get:
+      summary: List Prop Markets
+      description: 'List available prop market keys for a sport. FREE.
+
+
+        Returns all prop market types we have data for (e.g. player_points, player_pass_yds).
+
+        Use these keys with the /props endpoint''s markets parameter.
+
+
+        sleep_iter_51 #549: ETag-enabled now that iter_51 fixed the
+
+        cross-worker non-determinism in get_available_prop_markets
+
+        (the SQL ORDER BY now includes secondary sort keys).
+
+        Customers polling at SDK boot save bandwidth via 304
+
+        round-trips. 5min cache TTL.'
+      operationId: list_prop_markets_v1_sports__sport_key__props_markets_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/closing-lines:
+    get:
+      summary: Get Closing Lines
+      description: 'Get closing lines (last odds before match start). 5 credits.
+
+
+        EXCLUSIVE. Returns the final odds snapshot for each bookmaker before each
+
+        match commenced. Essential for CLV (closing line value) analysis.
+
+
+        "Before commenced" is enforced, not assumed. A price quoted at or after
+
+        the listed start time is an in play price, not a closing line, and is
+
+        excluded; so is a row whose start time we cannot read, because we cannot
+
+        attest which side of first serve it falls on. A fixture with no such
+
+        price is therefore absent from the response rather than represented by
+
+        an in play price. That trims coverage on books that reprice during a
+
+        match: measured 2026-09-04 over 30 days of table tennis, 54,120 of the
+
+        55,353 bovada side rows this endpoint used to return were quoted after
+
+        the start time.
+
+
+        Supports every sport key in GET /v1/sports. Pinnacle closing lines available
+
+        for the soccer competitions in that list.
+
+
+        **Bookmakers:** pinnacle (default), draftkings, fanduel, betmgm, caesars, bovada, and more.
+
+
+        Depth is bounded by your plan''s historical window; an explicit
+
+        `daysFrom` beyond it returns 403 HISTORICAL_LIMIT.
+
+
+        **Example:** `GET /v1/sports/soccer_epl/closing-lines?bookmakers=pinnacle&daysFrom=7`
+
+
+        Response includes h2h (3-way with draw for soccer), spreads, and totals.
+
+        Each event includes the bookmaker''s last update timestamp before kickoff.'
+      operationId: get_closing_lines_v1_sports__sport_key__closing_lines_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmakers
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: daysFrom
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 30
+          minimum: 1
+          default: 3
+          title: Daysfrom
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          description: 'sleep_iter_15 #514: max closing-line rows returned. Default 10000 effectively returns all (preserves prior behavior). Lower for top-N quick views.'
+          default: 10000
+          title: Limit
+        description: 'sleep_iter_15 #514: max closing-line rows returned. Default 10000 effectively returns all (preserves prior behavior). Lower for top-N quick views.'
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 0
+          description: Page offset within the result set. Combine with limit for pagination.
+          default: 0
+          title: Offset
+        description: Page offset within the result set. Combine with limit for pagination.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Pre-match closing odds for CLV analysis
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/futures:
+    get:
+      summary: Get Futures
+      description: 'Get futures/outrights odds (championship winners, MVP, etc). 5 credits.
+
+
+        Returns long-term markets like championship winners, division winners,
+
+        MVP awards, and season-long props.
+
+
+        **Example:** `GET /v1/sports/icehockey_nhl/futures`'
+      operationId: get_futures_v1_sports__sport_key__futures_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmakers
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          description: american (default) | decimal. Selections get a matching `decimal` field alongside the existing `american` keys when decimal is requested.
+          default: american
+          title: Oddsformat
+        description: american (default) | decimal. Selections get a matching `decimal` field alongside the existing `american` keys when decimal is requested.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Season-long futures markets
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/live:
+    get:
+      summary: Get Live Odds
+      description: 'In-play odds only. 3 credits.
+
+
+        Returns events whose `commence_time` is within the last `max_age_hours`
+
+        hours AND is at or before now (i.e. started and presumably still in play).
+
+        Pulls from the same `odds_snapshots` table that powers
+
+        /v1/sports/{key}/odds. Game lines (h2h/spreads/totals) come from there;
+
+        "live"-tagged player props that some books emit are merged in too. The
+
+        distinction from /odds is the time filter, not the data source.
+
+
+        sleep_iter_6 #507 (pass-10 finding 6 from the public audit): the prior
+
+        filter was `commence_time <= now` with no lower bound, which returned
+
+        games that started 13+ hours ago and had been over for many hours.
+
+        The default 6-hour window now matches typical game lengths and the
+
+        `max_age_hours` knob lets callers tune it for their sport.
+
+
+        **Example:** `GET /v1/sports/baseball_mlb/live?bookmakers=pinnacle&markets=h2h&max_age_hours=4`'
+      operationId: get_live_odds_v1_sports__sport_key__live_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmakers
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          description: h2h, spreads, totals (comma-separated)
+          default: h2h
+          title: Markets
+        description: 'h2h, spreads, totals (comma-separated) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: regions
+        in: query
+        required: false
+        schema:
+          type: string
+          description: us, eu, uk, au (comma-separated)
+          default: us
+          title: Regions
+        description: 'us, eu, uk, au (comma-separated) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: include
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Comma-separated. 'verification' adds verified_at / line_changed_at / is_current per bookmaker.
+          default: normalized
+          title: Include
+        description: Comma-separated. 'verification' adds verified_at / line_changed_at / is_current per bookmaker.
+      - name: max_age_hours
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 24.0
+          minimum: 0.5
+          description: Only include events whose commence_time is within the last N hours. Default 6 covers a typical MLB or NBA game plus extra innings / overtime. Raise to 12 for events with longer windows (long tennis matches, soccer with stoppage time), or lower to 3 for stricter in-play filtering.
+          default: 6.0
+          title: Max Age Hours
+        description: Only include events whose commence_time is within the last N hours. Default 6 covers a typical MLB or NBA game plus extra innings / overtime. Raise to 12 for events with longer windows (long tennis matches, soccer with stoppage time), or lower to 3 for stricter in-play filtering.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 3
+      x-credit-cost-type: fixed
+      x-credit-cost-description: In-play odds for currently live games
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/compare:
+    get:
+      summary: Compare Odds
+      description: 'Compare odds across all bookmakers for each event. 5 credits.
+
+
+        EXCLUSIVE. Returns every event with odds from all available bookmakers
+
+        side-by-side, plus the best odds and hold percentage for each outcome.
+
+
+        **Example:** `GET /v1/sports/americanfootball_nfl/compare?markets=h2h`
+
+
+        For each event, returns each bookmaker''s odds + which book has the best line.'
+      operationId: compare_odds_v1_sports__sport_key__compare_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Market type
+          default: h2h
+          title: Markets
+        description: 'Market type Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'CSV of bookmaker keys to include. Omit for all books. iter_060 #466.'
+          title: Bookmakers
+        description: 'CSV of bookmaker keys to include. Omit for all books. iter_060 #466. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 5
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Cross-book price comparison + best-line
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/best-line:
+    get:
+      summary: Best Line Alias
+      description: 'Alias for `/v1/sports/{key}/compare`. Same response shape, same
+
+        credit cost (5 credits). Provided so customers migrating from the-odds-api
+
+        who followed our migration page can hit the URL it advertised.'
+      operationId: best_line_alias_v1_sports__sport_key__best_line_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          type: string
+          default: h2h
+          title: Markets
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmakers
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/odds/props:
+    get:
+      summary: Odds Props Alias
+      description: 'Alias for `/v1/sports/{key}/props`. Same response shape, same
+
+        credit cost (3 credits). Provided so customers migrating from the-odds-api
+
+        who followed our migration page can hit the URL it advertised.
+
+
+        Same parameters as `/v1/sports/{key}/props`, including `maxAgeSec` and
+
+        `include`.'
+      operationId: odds_props_alias_v1_sports__sport_key__odds_props_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Markets
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Bookmakers
+        style: form
+        explode: false
+        description: 'Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+      - name: player
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Player
+      - name: eventId
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Eventid
+      - name: oddsFormat
+        in: query
+        required: false
+        schema:
+          type: string
+          default: american
+          title: Oddsformat
+      - name: dfsOdds
+        in: query
+        required: false
+        schema:
+          type: string
+          default: midpoint
+          title: Dfsodds
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          default: 5000
+          title: Limit
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 0
+          default: 0
+          title: Offset
+      - name: grouped
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Grouped
+      - name: include_event_markets
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Event Markets
+      - name: maxAgeSec
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 3600
+            minimum: 1
+          - type: 'null'
+          title: Maxagesec
+      - name: include
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Include
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/arbitrage:
+    get:
+      summary: Find Arbitrage
+      description: 'Find arbitrage opportunities across bookmakers. 10 credits.
+
+
+        EXCLUSIVE. Scans all events across all bookmakers and identifies games
+
+        where the combined implied probability is less than 100%, meaning a
+
+        guaranteed profit is possible by betting both sides at different books.
+
+
+        **Example:** `GET /v1/sports/americanfootball_nfl/arbitrage?minProfit=1`
+
+
+        Returns events with arb opportunities, the optimal bet split, and expected profit %.
+
+
+        **Pagination headers** (sleep_iter_14): every response carries
+
+        `x-result-page-size`, `x-result-limit`, `x-result-offset`,
+
+        `x-result-has-more`, `x-result-total-available`, and (when has-more)
+
+        `x-next-offset`. Body shape unchanged.'
+      operationId: find_arbitrage_v1_sports__sport_key__arbitrage_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: include_live
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: 'Include games that have already started or finished. Off by default: these endpoints rank BETS, and a bet on a finished game is not actionable. Set true to see commenced games too.'
+          default: false
+          title: Include Live
+        description: 'Include games that have already started or finished. Off by default: these endpoints rank BETS, and a bet on a finished game is not actionable. Set true to see commenced games too.'
+      - name: minProfit
+        in: query
+        required: false
+        schema:
+          type: number
+          description: Minimum profit % to include (e.g. 1.5)
+          default: 0
+          title: Minprofit
+        description: Minimum profit % to include (e.g. 1.5)
+      - name: exclude_exchanges
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: 'Exclude arbs where either side is anchored on an exchange (novig, prophetx). Exchange asks can be no-volume ''shill'' orders that aren''t actually takeable. iter_062 #473. When false (default), arbs still surface with an `is_exchange_anchored` flag so callers can choose.'
+          default: false
+          title: Exclude Exchanges
+        description: 'Exclude arbs where either side is anchored on an exchange (novig, prophetx). Exchange asks can be no-volume ''shill'' orders that aren''t actually takeable. iter_062 #473. When false (default), arbs still surface with an `is_exchange_anchored` flag so callers can choose.'
+      - name: exclude_books
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'CSV of book keys to exclude from EITHER side of every arb. iter_064 #481. Example: `exclude_books=prophetx,novig` to drop arbs anchored on exchanges. Cleaner than exclude_exchanges when you want to drop additional books.'
+          title: Exclude Books
+        description: 'CSV of book keys to exclude from EITHER side of every arb. iter_064 #481. Example: `exclude_books=prophetx,novig` to drop arbs anchored on exchanges. Cleaner than exclude_exchanges when you want to drop additional books.'
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'CSV of market_keys to limit the arb scan to. iter_064 #481. Example: `markets=h2h,spreads,totals` for game lines only; `markets=player_points` to focus on points props.'
+          title: Markets
+        description: 'CSV of market_keys to limit the arb scan to. iter_064 #481. Example: `markets=h2h,spreads,totals` for game lines only; `markets=player_points` to focus on points props. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 1
+          description: 'sleep_iter_14 #513: max arb opportunities returned per call. Default 10000 effectively returns all (preserves prior behavior since typical query yields <500). Lower it (e.g. limit=20) for a top-N quick view.'
+          default: 10000
+          title: Limit
+        description: 'sleep_iter_14 #513: max arb opportunities returned per call. Default 10000 effectively returns all (preserves prior behavior since typical query yields <500). Lower it (e.g. limit=20) for a top-N quick view.'
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 10000
+          minimum: 0
+          description: Page offset within the sorted (best profit first) arb list. Combine with limit for pagination.
+          default: 0
+          title: Offset
+        description: Page offset within the sorted (best profit first) arb list. Combine with limit for pagination.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 10
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Pre-match arbitrage finder
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/ev:
+    get:
+      summary: Find Positive Ev
+      description: 'Find +EV bets by comparing sharp vs soft book lines. 10 credits.
+
+
+        EXCLUSIVE. Compares Pinnacle (or another sharp book) lines against
+
+        soft books (DraftKings, FanDuel, Caesars, Bovada). When a soft book''s
+
+        odds imply a lower probability than the sharp book, that''s +EV.
+
+
+        **Example:** `GET /v1/sports/americanfootball_nfl/ev?sharpBook=pinnacle&minEdge=3`
+
+
+        A 5% edge means the soft book is offering odds that are 5% better than
+
+        the sharp book''s assessment of true probability.
+
+
+        Parameter aliases (iter_056 #453): `min_edge_pct` is an alias for
+
+        `minEdge` (snake-case). Filters honored:
+
+        - `markets=` CSV market_key filter (e.g. player_points,player_assists)
+
+        - `min_books=` minimum number of books in the comparison
+
+        - `minEdge` / `min_edge_pct` minimum edge % to include
+
+        Earlier these were silently dropped per iter_056 tester report.'
+      operationId: find_positive_ev_v1_sports__sport_key__ev_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: include_live
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: 'Include games that have already started or finished. Off by default: these endpoints rank BETS, and a bet on a finished game is not actionable. Set true to see commenced games too.'
+          default: false
+          title: Include Live
+        description: 'Include games that have already started or finished. Off by default: these endpoints rank BETS, and a bet on a finished game is not actionable. Set true to see commenced games too.'
+      - name: sharpBook
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Sharp book to use as true odds baseline
+          default: pinnacle
+          title: Sharpbook
+        description: Sharp book to use as true odds baseline
+      - name: minEdge
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Minimum edge % to include (default 2.0)
+          title: Minedge
+        description: Minimum edge % to include (default 2.0)
+      - name: min_edge_pct
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Snake-case alias for minEdge
+          title: Min Edge Pct
+        description: Snake-case alias for minEdge
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: CSV of market_keys to include (e.g. player_points,player_assists)
+          title: Markets
+        description: 'CSV of market_keys to include (e.g. player_points,player_assists) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: min_books
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: integer
+            maximum: 50
+            minimum: 1
+          - type: 'null'
+          description: Minimum books_compared per row
+          title: Min Books
+        description: Minimum books_compared per row
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 500
+          minimum: 1
+          description: 'Max EV picks returned (default 200, max 500). sleep_iter_13 #512: prior hardcoded 200 cap is now caller-controllable. Combined with offset for pagination.'
+          default: 200
+          title: Limit
+        description: 'Max EV picks returned (default 200, max 500). sleep_iter_13 #512: prior hardcoded 200 cap is now caller-controllable. Combined with offset for pagination.'
+      - name: offset
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 2000
+          minimum: 0
+          description: Page offset within the sorted EV pick list. Combine with limit for pagination.
+          default: 0
+          title: Offset
+        description: Page offset within the sorted EV pick list. Combine with limit for pagination.
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 10
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Positive expected-value picks
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+  /v1/sports/{sport_key}/consensus:
+    get:
+      summary: Get Consensus
+      description: 'Get consensus (average) odds across all bookmakers. 3 credits.
+
+
+        Returns the average odds, best odds, worst odds, and hold/vig
+
+        for each market across all bookmakers. Useful for identifying
+
+        where your book stands vs the market.
+
+
+        The average is taken in probability space: each book''s American
+
+        price is converted to its implied probability, those are averaged
+
+        into `consensus_prob`, and `consensus_odds` is that probability
+
+        converted back. Averaging American prices directly is invalid
+
+        because the scale jumps across zero, so +150 and -150 would
+
+        average to 0 rather than to even money.
+
+
+        iter_058 #462: prediction markets are excluded from the rollup by
+
+        default. Kalshi was producing wildly off prices like +3233 for
+
+        ''Phillies win'' that turned out to reference a different market
+
+        (e.g. series winner, not next game ML) and skewed consensus_odds
+
+        to nonsense values. Use `?include_prediction_markets=true` to
+
+        restore the prior behavior of mixing them in.'
+      operationId: get_consensus_v1_sports__sport_key__consensus_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      - name: include_prediction_markets
+        in: query
+        required: false
+        schema:
+          type: boolean
+          description: Include Kalshi/Polymarket prices in the consensus rollup. Defaults to False because prediction markets often price derivative questions (e.g. 'Phillies win series') that look like h2h ML but skew the average. Set true if you specifically want their prices mixed in.
+          default: false
+          title: Include Prediction Markets
+        description: Include Kalshi/Polymarket prices in the consensus rollup. Defaults to False because prediction markets often price derivative questions (e.g. 'Phillies win series') that look like h2h ML but skew the average. Set true if you specifically want their prices mixed in.
+      - name: bookmakers
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'CSV of bookmaker keys to include in the rollup. Omit to include all books for the sport. iter_060 #465.'
+          title: Bookmakers
+        description: 'CSV of bookmaker keys to include in the rollup. Omit to include all books for the sport. iter_060 #465. Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      - name: markets
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: CSV of market_keys to filter to (e.g. h2h,player_points)
+          title: Markets
+        description: 'CSV of market_keys to filter to (e.g. h2h,player_points) Repeating this parameter is the same as the comma form: ?markets=h2h&markets=spreads and ?markets=h2h,spreads are one request, billed identically, and return the union. A value repeated across occurrences is counted once.'
+        style: form
+        explode: false
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      x-credit-cost: 3
+      x-credit-cost-type: fixed
+      x-credit-cost-description: Consensus / no-vig fair line
+      security:
+      - apiKeyHeader: []
+      - apiKeyQuery: []
+      - bearerAuth: []
+      tags:
+      - Sports & Odds
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

@@ -1,0 +1,127 @@
+openapi: 3.2.0
+info:
+  title: Parlay Dashboard API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Dashboard
+paths:
+  /dashboard:
+    get:
+      tags:
+      - Dashboard
+      summary: Dashboard Page
+      operationId: dashboard_page_dashboard_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /dashboard/billing:
+    get:
+      tags:
+      - Dashboard
+      summary: Billing Page
+      description: 'Self-serve tier upgrade / downgrade page.
+
+
+        The legacy /dashboard/billing link from the dashboard upgrade
+
+        banner used to 404 (the page was referenced but not implemented).
+
+        Customers who''d hit their credit cap saw the ''Upgrade tier'' button,
+
+        clicked it, and landed on a dead page, then went hunting through
+
+        the Stripe portal where the only visible action was ''Cancel''. One
+
+        confirmed support ticket (Bryce, 2026-05-11) from this exact path.
+
+
+        This page shows the customer''s current tier, recent usage, and
+
+        one-click upgrade buttons that POST directly to /billing/checkout
+
+        for each higher tier. Downgrade routes through the Stripe Customer
+
+        Portal which they can also reach from here.'
+      operationId: billing_page_dashboard_billing_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /dashboard/billing/cancel:
+    get:
+      tags:
+      - Dashboard
+      summary: Billing Cancel Page
+      description: 'Confirmation step for a self-serve cancellation.
+
+
+        A cancel that happens on one click is a cancel people undo by email, so
+
+        this page states what will actually happen before the POST: which plan,
+
+        which date access runs to, that the key keeps working on Free
+
+        afterwards, and what the refund policy is. The POST target is
+
+        /billing/subscription/cancel, which picks cancel-at-period-end or
+
+        cancel-now from the subscription''s Stripe status.
+
+
+        Stripe is read here only to fill in the date and the status. If that
+
+        read fails we still render the page with the button, because the one
+
+        outcome we must never produce is a customer who came here to stop
+
+        paying and found nothing to click.'
+      operationId: billing_cancel_page_dashboard_billing_cancel_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+components:
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

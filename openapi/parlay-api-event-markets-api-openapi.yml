@@ -1,0 +1,303 @@
+openapi: 3.2.0
+info:
+  title: Parlay Event Markets API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: event_markets
+paths:
+  /v1/event-markets/examples:
+    get:
+      tags:
+      - event_markets
+      summary: Event Market Examples
+      description: Return copy-paste example searches for event-market discovery.
+      operationId: event_market_examples_v1_event_markets_examples_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /v1/prediction-markets/search:
+    get:
+      tags:
+      - event_markets
+      summary: Search Event Markets
+      description: 'Search non-standard event markets across public/free source surfaces.
+
+
+        This is a beta discovery endpoint. It does not assert arbitrage-ready
+
+        equivalence across venues, it returns candidate matches with source-native
+
+        prices so customers can inspect the exact live markets.'
+      operationId: search_event_markets_v1_prediction_markets_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 120
+          description: Free-text market search
+          title: Q
+        description: Free-text market search
+      - name: sources
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Comma-separated sources
+          default: kalshi,polymarket,novig
+          title: Sources
+        description: Comma-separated sources
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 25
+          title: Limit
+      - name: min_volume
+        in: query
+        required: false
+        schema:
+          type: number
+          minimum: 0
+          description: Drop markets below this source-native volume
+          default: 0
+          title: Min Volume
+        description: Drop markets below this source-native volume
+      - name: min_confidence
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 1
+          minimum: 0
+          description: Drop weak text matches
+          default: 0
+          title: Min Confidence
+        description: Drop weak text matches
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          description: balanced or match
+          default: balanced
+          title: Sort
+        description: balanced or match
+      - name: include_raw
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Raw
+      - name: include_closed
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Closed
+      - name: include_unpriced
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Unpriced
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /v1/event-markets/search:
+    get:
+      tags:
+      - event_markets
+      summary: Search Event Markets
+      description: 'Search non-standard event markets across public/free source surfaces.
+
+
+        This is a beta discovery endpoint. It does not assert arbitrage-ready
+
+        equivalence across venues, it returns candidate matches with source-native
+
+        prices so customers can inspect the exact live markets.'
+      operationId: search_event_markets_v1_event_markets_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          maxLength: 120
+          description: Free-text market search
+          title: Q
+        description: Free-text market search
+      - name: sources
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Comma-separated sources
+          default: kalshi,polymarket,novig
+          title: Sources
+        description: Comma-separated sources
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 25
+          title: Limit
+      - name: min_volume
+        in: query
+        required: false
+        schema:
+          type: number
+          minimum: 0
+          description: Drop markets below this source-native volume
+          default: 0
+          title: Min Volume
+        description: Drop markets below this source-native volume
+      - name: min_confidence
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 1
+          minimum: 0
+          description: Drop weak text matches
+          default: 0
+          title: Min Confidence
+        description: Drop weak text matches
+      - name: sort
+        in: query
+        required: false
+        schema:
+          type: string
+          description: balanced or match
+          default: balanced
+          title: Sort
+        description: balanced or match
+      - name: include_raw
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Raw
+      - name: include_closed
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Closed
+      - name: include_unpriced
+        in: query
+        required: false
+        schema:
+          type: boolean
+          default: false
+          title: Include Unpriced
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

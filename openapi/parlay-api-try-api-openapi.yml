@@ -1,0 +1,386 @@
+openapi: 3.2.0
+info:
+  title: Parlay Try API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Try
+paths:
+  /v1/try/verdict:
+    get:
+      summary: Try Verdict
+      description: 'Free, no-auth ''should I bet this?'' demo. Rate-limited to 60/hour per IP,
+
+        US books, no staking/movement (those need a free key). The shareable hook:
+
+        paste a bet, get the fair price, best book, and a plain-English call.'
+      operationId: try_verdict_v1_try_verdict_get
+      parameters:
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          description: sport_key, e.g. baseball_mlb
+          title: Sport
+        description: sport_key, e.g. baseball_mlb
+      - name: side
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Team (h2h/spreads), or over/under (totals/props)
+          title: Side
+        description: Team (h2h/spreads), or over/under (totals/props)
+      - name: market
+        in: query
+        required: false
+        schema:
+          type: string
+          description: h2h | spreads | totals | a player-prop key
+          default: h2h
+          title: Market
+        description: h2h | spreads | totals | a player-prop key
+      - name: home
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Home
+      - name: away
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Away
+      - name: team
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Team
+      - name: player
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Player
+      - name: line
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Line
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Try
+  /v1/try/sgp/price:
+    post:
+      summary: Try Sgp Price
+      description: '**Free no-auth SGP independent-baseline pricer.** Takes a list
+
+        of legs with American prices, returns the independent-baseline
+
+        parlay price (product of marginal implied probs converted back to
+
+        American). Capped at 60 requests/hour per IP and at 4 legs.
+
+
+        This is *not* a real SGP price — real SGP prices include
+
+        correlation modeling (correlated outcomes from the same game push
+
+        the parlay price away from the independent product in either
+
+        direction). Use the full /v1/sgp/price for literature-based
+
+        correlation-adjusted pricing.
+
+
+        Body: `{"legs": [{"price": -110}, {"price": +150}, ...]}`.'
+      operationId: try_sgp_price_v1_try_sgp_price_post
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+      tags:
+      - Try
+  /v1/try/{sport_key}/odds:
+    get:
+      summary: Try Odds
+      description: '**Free no-auth demo.** Live moneyline odds for a popular US sport,
+
+        no API key required. Capped at 60 requests/hour per IP and the
+
+        first 5 events.
+
+
+        Available sports: baseball_mlb, basketball_nba, americanfootball_nfl,
+
+        icehockey_nhl, soccer_epl, mma_mixed_martial_arts.
+
+
+        For full access (every sport key, all 32 books, all markets, no
+
+        rate limit beyond your tier): https://parlay-api.com/signup'
+      operationId: try_odds_v1_try__sport_key__odds_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Try
+  /v1/try/{sport_key}/arbitrage:
+    get:
+      summary: Try Arbitrage
+      description: '**Free no-auth arbitrage demo.** Pre-computed cross-book arbitrage
+
+        opportunities for a popular US sport, no API key required. Capped
+
+        at 30 requests/hour per IP and the top 5 opportunities by edge
+
+        percent.
+
+
+        Available sports: baseball_mlb, basketball_nba, americanfootball_nfl,
+
+        icehockey_nhl, soccer_epl, mma_mixed_martial_arts.
+
+
+        For full access (all sports, no result cap, no rate limit beyond
+
+        your tier): https://parlay-api.com/signup'
+      operationId: try_arbitrage_v1_try__sport_key__arbitrage_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Try
+  /v1/try/{sport_key}/ev:
+    get:
+      summary: Try Ev
+      description: '**Free no-auth positive-EV demo.** Surfaces the top moneyline
+
+        positive-EV opportunities for a popular US sport, no API key
+
+        required. Capped at 60 requests/hour per IP and the top 5
+
+        opportunities by edge percent.
+
+
+        How edge is computed: Pinnacle (sharp book) two-sided ML price is
+
+        devigged to a no-vig fair probability per side. For every other
+
+        book''s offered price on the same side, edge = fair_prob -
+
+        book_implied_prob. Anything above 0 is a "+EV" play vs Pinnacle as
+
+        anchor.
+
+
+        Available sports: baseball_mlb, basketball_nba, americanfootball_nfl,
+
+        icehockey_nhl, soccer_epl, mma_mixed_martial_arts.
+
+
+        For full access (all sports, all markets, spreads/totals/props, no
+
+        cap): https://parlay-api.com/signup'
+      operationId: try_ev_v1_try__sport_key__ev_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Try
+  /v1/try/{sport_key}/middles:
+    get:
+      summary: Try Middles
+      description: '**Free no-auth middling demo.** Surfaces the widest cross-book
+
+        totals middle windows for a popular US sport, no API key required.
+
+        Capped at 60 requests/hour per IP and the top 5 opportunities by
+
+        middle window width.
+
+
+        A "middle" on totals: bet Over X.5 at one book and Under Y.5 at
+
+        another, where X < Y. If the final game total lands in (X, Y) you
+
+        win BOTH bets. We rank by window width (the integer count of
+
+        possible winning totals).
+
+
+        Available sports: baseball_mlb, basketball_nba, americanfootball_nfl,
+
+        icehockey_nhl, soccer_epl, mma_mixed_martial_arts.
+
+
+        For spreads middles, all markets, all sports, no cap:
+
+        https://parlay-api.com/signup'
+      operationId: try_middles_v1_try__sport_key__middles_get
+      parameters:
+      - name: sport_key
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Sport Key
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+      tags:
+      - Try
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'

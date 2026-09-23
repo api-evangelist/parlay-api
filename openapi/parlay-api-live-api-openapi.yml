@@ -1,0 +1,700 @@
+openapi: 3.2.0
+info:
+  title: Parlay Live API
+  description: Real-time sports odds aggregation from **33 books and data sources** updated every 2-120 seconds depending on source cadence.
+  version: 3.2.0
+  x-credit-currency: credits
+  x-credit-cost-catalogue-url: /v1/meta/credit-costs
+  x-pricing-url: /v1/pricing
+  x-usage-url: /v1/usage
+  contact:
+    name: ParlayAPI support
+    url: https://parlay-api.com/support
+    email: support@parlay-api.com
+  license:
+    name: ParlayAPI Terms of Service
+    url: https://parlay-api.com/terms
+  termsOfService: https://parlay-api.com/terms
+servers:
+- url: https://parlay-api.com
+  description: Production (primary; HTTP/2, TLS 1.3).
+- url: https://api.parlay-api.com
+  description: Production (high-volume; bypasses Cloudflare edge for trading bots above 30 req/min). Same origin, same auth, same endpoints.
+tags:
+- name: Live
+paths:
+  /live:
+    get:
+      tags:
+      - Live
+      summary: Live Page
+      description: Serve the live odds dashboard.
+      operationId: live_page_live_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+  /live/api/data_flow:
+    get:
+      tags:
+      - Live
+      summary: Live Data Flow
+      description: 'Per-source freshness for the /live page status strip.
+
+
+        For each active sportsbook reports the last time we POLLED the
+
+        upstream, not the last time we wrote a price-change row. The two
+
+        differ: change-detection suppresses no-change writes, so
+
+        MAX(timestamp_ms) on prop_snapshots reports the last price MOVE,
+
+        which for many books is much older than the last poll cycle. Using
+
+        poll_pulses (Redis-backed heartbeats, written every poll cycle
+
+        regardless of change-detection) gives the true "last poll" age.
+
+
+        Falls back to MAX(timestamp_ms) for sources that don''t write pulses
+
+        yet, so we keep the chip visible (with an honest ''fallback: true''
+
+        tag so we can audit which sources still need pulse coverage).
+
+
+        Cached 5s, public, no auth.'
+      operationId: live_data_flow_live_api_data_flow_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /live/api/sports:
+    get:
+      tags:
+      - Live
+      summary: Live Sports
+      description: Active sports with event counts. No auth required. Cached 60s.
+      operationId: live_sports_live_api_sports_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+  /live/api/games:
+    get:
+      tags:
+      - Live
+      summary: Live Games
+      description: Games for a sport with odds preview. Anonymous users get limited books.
+      operationId: live_games_live_api_games_get
+      parameters:
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Sport
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/game/{event_id}:
+    get:
+      tags:
+      - Live
+      summary: Live Game Detail
+      description: 'Full game detail with all books + props.
+
+
+        Customer report 2026-05-21: a Scale-tier account hit
+
+        "credits_exhausted" clicking a game card. Two bugs were stacked:
+
+
+        1) _get_user_api_key (since removed) returned api_key_display, the
+
+        masked 8-char prefix like ''sk_live_...'', NOT the full key. The
+
+        hash of that masked string never matched any stored hash, so
+
+        _get_tier returned None and charge_credits returned False —
+
+        surfaced to the user as "credits_exhausted" but the real failure
+
+        was key lookup.
+
+
+        2) Charging a credit for the LIVE DASHBOARD didn''t match policy.
+
+        The new /live/api/game/{event_id}/view (the dedicated single-
+
+        game page) is free; the customer dashboard is free to browse.
+
+        Credits are for programmatic API egress, not dashboard reads.
+
+
+        So this endpoint is now free for any logged-in user, matching the
+
+        new view endpoint''s policy.'
+      operationId: live_game_detail_live_api_game__event_id__get
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Event Id
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Sport
+      - name: home
+        in: query
+        required: false
+        schema:
+          type: string
+          title: Home
+      - name: away
+        in: query
+        required: false
+        schema:
+          type: string
+          title: Away
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/game/{event_id}:
+    get:
+      tags:
+      - Live
+      summary: Live Game Page
+      description: 'Single-game live view for a retail bettor watching the game.
+
+
+        Server renders just the shell; the page calls
+
+        /live/api/game/{event_id}/view to populate, then opens a WebSocket
+
+        for live updates.'
+      operationId: live_game_page_live_game__event_id__get
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Event Id
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/game/{event_id}/view:
+    get:
+      tags:
+      - Live
+      summary: Live Game View Json
+      description: 'JSON for the single-game retail live view.
+
+
+        Anonymous: returns top-3-books table with sharp anchor visible.
+
+        Logged in: full table + props (no credit charge — this is the
+
+        customer-facing pricing view; we charge for API egress, not for
+
+        looking at the dashboard).'
+      operationId: live_game_view_json_live_api_game__event_id__view_get
+      parameters:
+      - name: event_id
+        in: path
+        required: true
+        schema:
+          type: string
+          title: Event Id
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Sport
+      - name: home
+        in: query
+        required: false
+        schema:
+          type: string
+          title: Home
+      - name: away
+        in: query
+        required: false
+        schema:
+          type: string
+          title: Away
+      - name: history_window_s
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 1800
+          minimum: 30
+          description: History window for movement calc (default 5 min).
+          default: 300
+          title: History Window S
+        description: History window for movement calc (default 5 min).
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/search:
+    get:
+      tags:
+      - Live
+      summary: Live Search
+      description: 'Search teams/players/tournaments across all sports. No auth required.
+
+
+        Sport-key matching uses the user''s literal query plus a space-to-
+
+        underscore-normalized variant, so ''ITF Kurume'' matches
+
+        ''tennis_itf_women_kurume'' (the sport_key the FD in-play source
+
+        emits for that tournament).
+
+
+        iter_049 #423: capped at `?limit=` (default 25) so broad-substring
+
+        queries like ''mlb'' don''t blow up trigram-index work. Was previously
+
+        unbounded; high-cardinality queries timed out at 20s.'
+      operationId: live_search_live_api_search_get
+      parameters:
+      - name: q
+        in: query
+        required: true
+        schema:
+          type: string
+          minLength: 2
+          title: Q
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 100
+          minimum: 1
+          description: 'Max results to return. iter_049 #423: previously unbounded; broad queries like ''mlb'' could time out. Default 25.'
+          default: 25
+          title: Limit
+        description: 'Max results to return. iter_049 #423: previously unbounded; broad queries like ''mlb'' could time out. Default 25.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/command_center:
+    get:
+      tags:
+      - Live
+      summary: Live Command Center
+      description: Best-line and book-breadth snapshot for the /live dashboard.
+      operationId: live_command_center_live_api_command_center_get
+      parameters:
+      - name: sport
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional sport key
+          title: Sport
+        description: Optional sport key
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 50
+          minimum: 1
+          default: 12
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/pbp:
+    get:
+      tags:
+      - Live
+      summary: Live Pbp
+      description: 'Recent play-by-play events for a sport (or specific game). Free, no auth.
+
+        Powers the ''What''s happening'' marquee on the /live page.'
+      operationId: live_pbp_live_api_pbp_get
+      parameters:
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Sport key, e.g. basketball_nba
+          title: Sport
+        description: Sport key, e.g. basketball_nba
+      - name: event_id
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Match id; omit for sport-wide
+          title: Event Id
+        description: Match id; omit for sport-wide
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 20
+          minimum: 1
+          default: 5
+          title: Limit
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/disagreement:
+    get:
+      tags:
+      - Live
+      summary: Live Disagreement
+      description: 'Top cross-book line disagreements right now, across all sports.
+
+        Free + no auth (showcase teaser). Updates every ~15s.
+
+
+        Powers the ''Books disagree right now'' sidebar on /live.
+
+        Full per-event detail with all books still requires the Pro+
+
+        /v1/sports/{sport_key}/live/disagreement endpoint.
+
+
+        Uses singleflight via cached_call so concurrent misses do not fan
+
+        out to N DB queries (the thundering-herd that pinned Postgres
+
+        earlier tonight).'
+      operationId: live_disagreement_live_api_disagreement_get
+      parameters:
+      - name: limit
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 25
+          minimum: 1
+          description: Top-N disagreements across all sports
+          default: 8
+          title: Limit
+        description: Top-N disagreements across all sports
+      - name: min_deviation_pct
+        in: query
+        required: false
+        schema:
+          type: number
+          maximum: 1
+          minimum: 0
+          description: Min cross-book deviation to surface
+          default: 0.025
+          title: Min Deviation Pct
+        description: Min cross-book deviation to surface
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/sparkline:
+    get:
+      tags:
+      - Live
+      summary: Live Sparkline
+      description: 'Recent line history for a single game, suitable for a tiny
+
+        inline sparkline on the live game card. Returns one point per minute
+
+        of moneyline (or h2h) movement across all books, averaged.
+
+        Free + no auth. Updates every 30s.'
+      operationId: live_sparkline_live_api_sparkline_get
+      parameters:
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Sport
+      - name: home_team
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Home Team
+      - name: away_team
+        in: query
+        required: true
+        schema:
+          type: string
+          title: Away Team
+      - name: minutes
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 180
+          minimum: 5
+          default: 30
+          title: Minutes
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /live/api/best-books:
+    get:
+      tags:
+      - Live
+      summary: Live Best Books
+      description: 'Rank sportsbooks by how good their prices have actually been.
+
+
+        Over the look-back window we sample each book''s price per game at 15-minute
+
+        buckets. At every (game, side, bucket) the book(s) holding the best
+
+        available American price are credited a win, and each book''s price is
+
+        scored against the field''s median (consensus). The response is a
+
+        leaderboard so a bettor can see, for this sport and window, which book to
+
+        line-shop first.
+
+
+        v1 covers h2h (moneyline) from odds_snapshots, which carries ~24 books
+
+        directly (DraftKings, FanDuel, Pinnacle, BetRivers, ...). Spreads, totals,
+
+        props, and per-game / per-book-type slices are the next increments.'
+      operationId: live_best_books_live_api_best_books_get
+      parameters:
+      - name: sport
+        in: query
+        required: true
+        schema:
+          type: string
+          description: Sport key, e.g. baseball_mlb (family umbrellas like soccer are expanded).
+          title: Sport
+        description: Sport key, e.g. baseball_mlb (family umbrellas like soccer are expanded).
+      - name: market
+        in: query
+        required: false
+        schema:
+          type: string
+          description: Bet type. v1 supports h2h (moneyline); spreads/totals/props coming.
+          default: h2h
+          title: Market
+        description: Bet type. v1 supports h2h (moneyline); spreads/totals/props coming.
+      - name: window_hours
+        in: query
+        required: false
+        schema:
+          type: integer
+          maximum: 336
+          minimum: 1
+          description: Look-back window in hours (1..336).
+          default: 24
+          title: Window Hours
+        description: Look-back window in hours (1..336).
+      - name: home
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Optional: restrict to one game by home team name (case-insensitive substring; orientation-agnostic).'
+          title: Home
+        description: 'Optional: restrict to one game by home team name (case-insensitive substring; orientation-agnostic).'
+      - name: away
+        in: query
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: 'Optional: restrict to one game by away team name.'
+          title: Away
+        description: 'Optional: restrict to one game by away team name.'
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            application/json:
+              schema: {}
+        '422':
+          description: Validation Error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+  /best-books:
+    get:
+      tags:
+      - Live
+      summary: Best Books Page
+      description: 'The line-shopping board: which sportsbook prices best, with sport /
+
+        window / bet-type toggles. Consumes /live/api/best-books.'
+      operationId: best_books_page_best_books_get
+      responses:
+        '200':
+          description: Successful Response
+          content:
+            text/html:
+              schema:
+                type: string
+components:
+  schemas:
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+  securitySchemes:
+    apiKeyHeader:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: API key passed in the X-API-Key header. Recommended.
+    apiKeyQuery:
+      type: apiKey
+      in: query
+      name: apiKey
+      description: API key passed as the ?apiKey= query parameter. Useful for browser fetch() and webhooks where header control is limited. Equivalent to X-API-Key.
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: APIKey
+      description: 'API key passed via Authorization: Bearer <key>. Equivalent to X-API-Key for compatibility with auth libraries that expect bearer tokens.'
