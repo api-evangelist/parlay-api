@@ -21,12 +21,13 @@ tags:
 - Player Props
 - Arbitrage
 - Streaming
+- Real-Time
 apis:
 - aid: parlay-api:parlay-api-acceptable-use-api
   name: ParlayAPI Acceptable Use API
   description: The Acceptable Use API from ParlayAPI — 1 operation(s) for acceptable use.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Acceptable Use
   properties:
@@ -62,7 +63,7 @@ apis:
   name: ParlayAPI Account API
   description: The Account API from ParlayAPI — 1 operation(s) for account.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Account
   properties:
@@ -98,7 +99,7 @@ apis:
   name: ParlayAPI Affiliates API
   description: The Affiliates API from ParlayAPI — 1 operation(s) for affiliates.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Affiliates
   properties:
@@ -134,7 +135,7 @@ apis:
   name: ParlayAPI Agent API
   description: The agent API from ParlayAPI — 3 operation(s) for agent.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Agents
   tags_raw:
@@ -172,7 +173,7 @@ apis:
   name: ParlayAPI Alerts API
   description: The alerts API from ParlayAPI — 2 operation(s) for alerts.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Alerts
   tags_raw:
@@ -210,7 +211,7 @@ apis:
   name: ParlayAPI Auth API
   description: The auth API from ParlayAPI — 6 operation(s) for auth.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Authentication
   tags_raw:
@@ -248,7 +249,7 @@ apis:
   name: ParlayAPI Badge API
   description: The Badge API from ParlayAPI — 1 operation(s) for badge.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Badge
   properties:
@@ -284,7 +285,7 @@ apis:
   name: ParlayAPI Billing API
   description: The billing API from ParlayAPI — 9 operation(s) for billing.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Billing
   tags_raw:
@@ -322,7 +323,7 @@ apis:
   name: ParlayAPI Calculators API
   description: The Calculators API from ParlayAPI — 8 operation(s) for calculators.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Calculators
   properties:
@@ -358,7 +359,7 @@ apis:
   name: ParlayAPI Changelog.json API
   description: The Changelog.json API from ParlayAPI — 1 operation(s) for changelog.json.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Changelog.json
   properties:
@@ -394,7 +395,7 @@ apis:
   name: ParlayAPI Clv API
   description: The clv API from ParlayAPI — 1 operation(s) for clv.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - clv
   properties:
@@ -430,7 +431,7 @@ apis:
   name: ParlayAPI Collections API
   description: The Collections API from ParlayAPI — 2 operation(s) for collections.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Collection
   tags_raw:
@@ -468,7 +469,7 @@ apis:
   name: ParlayAPI Dashboard API
   description: The dashboard API from ParlayAPI — 3 operation(s) for dashboard.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Dashboards
   tags_raw:
@@ -506,7 +507,7 @@ apis:
   name: ParlayAPI Datasets API
   description: The Datasets API from ParlayAPI — 2 operation(s) for datasets.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Datasets
   properties:
@@ -542,7 +543,7 @@ apis:
   name: ParlayAPI Discovery API
   description: The Discovery API from ParlayAPI — 7 operation(s) for discovery.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Discovery
   properties:
@@ -578,7 +579,7 @@ apis:
   name: ParlayAPI Divergence.json API
   description: The Divergence.json API from ParlayAPI — 1 operation(s) for divergence.json.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Divergence.json
   properties:
@@ -614,7 +615,7 @@ apis:
   name: ParlayAPI Dmca API
   description: The Dmca API from ParlayAPI — 1 operation(s) for dmca.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - DMCA
   tags_raw:
@@ -652,7 +653,7 @@ apis:
   name: ParlayAPI Event Markets API
   description: The event_markets API from ParlayAPI — 3 operation(s) for event_markets.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags: []
   tags_raw:
   - event_markets
@@ -689,7 +690,7 @@ apis:
   name: ParlayAPI Exchange API
   description: The Exchange API from ParlayAPI — 1 operation(s) for exchange.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Exchange
   properties:
@@ -725,7 +726,7 @@ apis:
   name: ParlayAPI Exchanges API
   description: The Exchanges API from ParlayAPI — 1 operation(s) for exchanges.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Exchange
   tags_raw:
@@ -763,7 +764,7 @@ apis:
   name: ParlayAPI Go API
   description: The Go API from ParlayAPI — 1 operation(s) for go.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Go
   properties:
@@ -799,7 +800,7 @@ apis:
   name: ParlayAPI Health API
   description: The Health API from ParlayAPI — 3 operation(s) for health.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Health
   properties:
@@ -835,7 +836,7 @@ apis:
   name: ParlayAPI Historical API
   description: The Historical API from ParlayAPI — 13 operation(s) for historical.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Historical
   properties:
@@ -871,7 +872,7 @@ apis:
   name: ParlayAPI Key API
   description: The Key API from ParlayAPI — 1 operation(s) for key.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Key
   properties:
@@ -907,7 +908,7 @@ apis:
   name: ParlayAPI Keys API
   description: The Keys API from ParlayAPI — 1 operation(s) for keys.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Keys
   properties:
@@ -943,7 +944,7 @@ apis:
   name: ParlayAPI Legal API
   description: The Legal API from ParlayAPI — 7 operation(s) for legal.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Legal
   properties:
@@ -979,7 +980,7 @@ apis:
   name: ParlayAPI Live API
   description: The live API from ParlayAPI — 14 operation(s) for live.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Live
   tags_raw:
@@ -1017,7 +1018,7 @@ apis:
   name: ParlayAPI Live & In-Play API
   description: Live odds, in-play arbs, and SSE streaming for active games.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Live & In-Play
   properties:
@@ -1053,7 +1054,7 @@ apis:
   name: ParlayAPI Metadata API
   description: The Metadata API from ParlayAPI — 34 operation(s) for metadata.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Metadata
   properties:
@@ -1089,7 +1090,7 @@ apis:
   name: ParlayAPI Metrics API
   description: The Metrics API from ParlayAPI — 1 operation(s) for metrics.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Metrics
   properties:
@@ -1125,7 +1126,7 @@ apis:
   name: ParlayAPI Moves.json API
   description: The Moves.json API from ParlayAPI — 1 operation(s) for moves.json.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Moves.json
   properties:
@@ -1161,7 +1162,7 @@ apis:
   name: ParlayAPI Odds Drop API
   description: The Odds Drop API from ParlayAPI — 1 operation(s) for odds drop.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Odds Drop
   properties:
@@ -1197,7 +1198,7 @@ apis:
   name: ParlayAPI Parlay API
   description: The ParlayAPI API from ParlayAPI — 2 operation(s) for parlayapi.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - ParlayAPI
   properties:
@@ -1233,7 +1234,7 @@ apis:
   name: ParlayAPI Partners API
   description: The Partners API from ParlayAPI — 1 operation(s) for partners.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Partners
   properties:
@@ -1269,7 +1270,7 @@ apis:
   name: ParlayAPI Prediction Markets API
   description: Kalshi and Polymarket prediction-market prices including crypto.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Prediction Markets
   properties:
@@ -1305,7 +1306,7 @@ apis:
   name: ParlayAPI Pricing API
   description: The Pricing API from ParlayAPI — 1 operation(s) for pricing.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Pricing
   properties:
@@ -1341,7 +1342,7 @@ apis:
   name: ParlayAPI Privacy API
   description: The Privacy API from ParlayAPI — 1 operation(s) for privacy.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Privacy
   properties:
@@ -1377,7 +1378,7 @@ apis:
   name: ParlayAPI Public Support API
   description: The public_support API from ParlayAPI — 1 operation(s) for public_support.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags: []
   tags_raw:
   - public_support
@@ -1414,7 +1415,7 @@ apis:
   name: ParlayAPI Sandbox API
   description: Auth-less deterministic responses for integration testing without credits.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Sandbox
   properties:
@@ -1450,7 +1451,7 @@ apis:
   name: ParlayAPI Sgp API
   description: The Sgp API from ParlayAPI — 1 operation(s) for sgp.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Sgp
   properties:
@@ -1486,7 +1487,7 @@ apis:
   name: ParlayAPI Specification API
   description: OpenAPI and AsyncAPI specs describing the REST and streaming surfaces.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Specification
   properties:
@@ -1522,7 +1523,7 @@ apis:
   name: ParlayAPI Sports & Odds API
   description: The Sports & Odds API from ParlayAPI — 34 operation(s) for sports & odds.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Sports & Odds
   properties:
@@ -1558,7 +1559,7 @@ apis:
   name: ParlayAPI Sse API
   description: The Sse API from ParlayAPI — 2 operation(s) for sse.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - SSE
   tags_raw:
@@ -1596,7 +1597,7 @@ apis:
   name: ParlayAPI Stats API
   description: The Stats API from ParlayAPI — 1 operation(s) for stats.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Stats
   properties:
@@ -1632,7 +1633,7 @@ apis:
   name: ParlayAPI Terms API
   description: The Terms API from ParlayAPI — 1 operation(s) for terms.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Terms
   properties:
@@ -1668,7 +1669,7 @@ apis:
   name: ParlayAPI Try API
   description: The Try API from ParlayAPI — 6 operation(s) for try.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Try
   properties:
@@ -1704,7 +1705,7 @@ apis:
   name: ParlayAPI Verdict API
   description: The Verdict API from ParlayAPI — 2 operation(s) for verdict.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Verdict
   properties:
@@ -1740,7 +1741,7 @@ apis:
   name: ParlayAPI Webhooks API
   description: The webhooks API from ParlayAPI — 5 operation(s) for webhooks.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Webhook
   tags_raw:
@@ -1778,7 +1779,7 @@ apis:
   name: ParlayAPI Widget API
   description: The Widget API from ParlayAPI — 1 operation(s) for widget.
   humanURL: https://parlay-api.com/docs
-  baseURL: https://parlay-api.com
+  baseURL: https://api.parlay-api.com
   tags:
   - Widgets
   tags_raw:

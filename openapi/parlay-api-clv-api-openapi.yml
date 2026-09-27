@@ -66,6 +66,25 @@ paths:
       - bearerAuth: []
 components:
   schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    Body_import_bet_screenshot_v1_clv_import_screenshot_post:
+      properties:
+        image:
+          anyOf:
+          - type: string
+            contentMediaType: application/octet-stream
+          - type: 'null'
+          title: Image
+      type: object
+      title: Body_import_bet_screenshot_v1_clv_import_screenshot_post
     ValidationError:
       properties:
         loc:
@@ -92,25 +111,6 @@ components:
       - msg
       - type
       title: ValidationError
-    Body_import_bet_screenshot_v1_clv_import_screenshot_post:
-      properties:
-        image:
-          anyOf:
-          - type: string
-            contentMediaType: application/octet-stream
-          - type: 'null'
-          title: Image
-      type: object
-      title: Body_import_bet_screenshot_v1_clv_import_screenshot_post
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
   securitySchemes:
     apiKeyHeader:
       type: apiKey

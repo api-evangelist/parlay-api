@@ -293,6 +293,28 @@ components:
           title: Is Active
       type: object
       title: WebhookPatch
+    WebhookCreate:
+      properties:
+        url:
+          type: string
+          title: Url
+        events:
+          items:
+            type: string
+          type: array
+          title: Events
+        sport_filter:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Sport Filter
+      type: object
+      required:
+      - url
+      - events
+      title: WebhookCreate
     ValidationError:
       properties:
         loc:
@@ -319,28 +341,6 @@ components:
       - msg
       - type
       title: ValidationError
-    WebhookCreate:
-      properties:
-        url:
-          type: string
-          title: Url
-        events:
-          items:
-            type: string
-          type: array
-          title: Events
-        sport_filter:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Sport Filter
-      type: object
-      required:
-      - url
-      - events
-      title: WebhookCreate
     HTTPValidationError:
       properties:
         detail:

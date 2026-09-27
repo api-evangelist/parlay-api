@@ -181,6 +181,70 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
+    AlertPatch:
+      properties:
+        enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Enabled
+        cooldown_seconds:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cooldown Seconds
+        threshold_line:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Threshold Line
+        direction:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Direction
+        expires_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Expires At
+      type: object
+      title: AlertPatch
+    ValidationError:
+      properties:
+        loc:
+          items:
+            anyOf:
+            - type: string
+            - type: integer
+          type: array
+          title: Location
+        msg:
+          type: string
+          title: Message
+        type:
+          type: string
+          title: Error Type
+        input:
+          title: Input
+        ctx:
+          type: object
+          title: Context
+      type: object
+      required:
+      - loc
+      - msg
+      - type
+      title: ValidationError
     AlertCreate:
       properties:
         sport_key:
@@ -232,70 +296,6 @@ components:
       - threshold_line
       - webhook_id
       title: AlertCreate
-    ValidationError:
-      properties:
-        loc:
-          items:
-            anyOf:
-            - type: string
-            - type: integer
-          type: array
-          title: Location
-        msg:
-          type: string
-          title: Message
-        type:
-          type: string
-          title: Error Type
-        input:
-          title: Input
-        ctx:
-          type: object
-          title: Context
-      type: object
-      required:
-      - loc
-      - msg
-      - type
-      title: ValidationError
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    AlertPatch:
-      properties:
-        enabled:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Enabled
-        cooldown_seconds:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Cooldown Seconds
-        threshold_line:
-          anyOf:
-          - type: number
-          - type: 'null'
-          title: Threshold Line
-        direction:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Direction
-        expires_at:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Expires At
-      type: object
-      title: AlertPatch
   securitySchemes:
     apiKeyHeader:
       type: apiKey
