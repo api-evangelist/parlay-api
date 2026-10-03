@@ -293,28 +293,15 @@ components:
           title: Is Active
       type: object
       title: WebhookPatch
-    WebhookCreate:
+    HTTPValidationError:
       properties:
-        url:
-          type: string
-          title: Url
-        events:
+        detail:
           items:
-            type: string
+            $ref: '#/components/schemas/ValidationError'
           type: array
-          title: Events
-        sport_filter:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Sport Filter
+          title: Detail
       type: object
-      required:
-      - url
-      - events
-      title: WebhookCreate
+      title: HTTPValidationError
     ValidationError:
       properties:
         loc:
@@ -341,15 +328,28 @@ components:
       - msg
       - type
       title: ValidationError
-    HTTPValidationError:
+    WebhookCreate:
       properties:
-        detail:
+        url:
+          type: string
+          title: Url
+        events:
           items:
-            $ref: '#/components/schemas/ValidationError'
+            type: string
           type: array
-          title: Detail
+          title: Events
+        sport_filter:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          title: Sport Filter
       type: object
-      title: HTTPValidationError
+      required:
+      - url
+      - events
+      title: WebhookCreate
   securitySchemes:
     apiKeyHeader:
       type: apiKey

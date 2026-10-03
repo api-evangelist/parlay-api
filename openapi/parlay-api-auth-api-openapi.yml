@@ -218,6 +218,40 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
+    Body_reset_password_submit_reset_password_post:
+      properties:
+        token:
+          type: string
+          title: Token
+        password:
+          type: string
+          title: Password
+      type: object
+      required:
+      - token
+      - password
+      title: Body_reset_password_submit_reset_password_post
+    Body_signup_submit_signup_post:
+      properties:
+        email:
+          type: string
+          title: Email
+        password:
+          type: string
+          title: Password
+        next:
+          type: string
+          title: Next
+          default: ''
+        attribution:
+          type: string
+          title: Attribution
+          default: ''
+      type: object
+      required:
+      - email
+      - password
+      title: Body_signup_submit_signup_post
     Body_login_submit_login_post:
       properties:
         email:
@@ -235,6 +269,15 @@ components:
       - email
       - password
       title: Body_login_submit_login_post
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     ValidationError:
       properties:
         loc:
@@ -261,27 +304,6 @@ components:
       - msg
       - type
       title: ValidationError
-    Body_signup_submit_signup_post:
-      properties:
-        email:
-          type: string
-          title: Email
-        password:
-          type: string
-          title: Password
-        next:
-          type: string
-          title: Next
-          default: ''
-        attribution:
-          type: string
-          title: Attribution
-          default: ''
-      type: object
-      required:
-      - email
-      - password
-      title: Body_signup_submit_signup_post
     Body_forgot_password_submit_forgot_password_post:
       properties:
         email:
@@ -291,28 +313,6 @@ components:
       required:
       - email
       title: Body_forgot_password_submit_forgot_password_post
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
-    Body_reset_password_submit_reset_password_post:
-      properties:
-        token:
-          type: string
-          title: Token
-        password:
-          type: string
-          title: Password
-      type: object
-      required:
-      - token
-      - password
-      title: Body_reset_password_submit_reset_password_post
   securitySchemes:
     apiKeyHeader:
       type: apiKey
