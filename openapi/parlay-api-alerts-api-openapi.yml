@@ -190,35 +190,6 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
-    AlertPatch:
-      properties:
-        enabled:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          title: Enabled
-        cooldown_seconds:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          title: Cooldown Seconds
-        threshold_line:
-          anyOf:
-          - type: number
-          - type: 'null'
-          title: Threshold Line
-        direction:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Direction
-        expires_at:
-          anyOf:
-          - type: string
-          - type: 'null'
-          title: Expires At
-      type: object
-      title: AlertPatch
     ValidationError:
       properties:
         loc:
@@ -296,6 +267,35 @@ components:
       - threshold_line
       - webhook_id
       title: AlertCreate
+    AlertPatch:
+      properties:
+        enabled:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          title: Enabled
+        cooldown_seconds:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          title: Cooldown Seconds
+        threshold_line:
+          anyOf:
+          - type: number
+          - type: 'null'
+          title: Threshold Line
+        direction:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Direction
+        expires_at:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Expires At
+      type: object
+      title: AlertPatch
   securitySchemes:
     apiKeyHeader:
       type: apiKey
