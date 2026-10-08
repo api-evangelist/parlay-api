@@ -1821,6 +1821,8 @@ x-source:
   fetched: '2026-09-07'
   note: Every pointer probed before writing; controls discriminate.
 common:
+- type: RateLimits
+  url: rate-limits/parlay-api-rate-limits.yml
 - type: CapabilityMap
   url: capabilities/parlay-api-capability-edges.yml
   name: ParlayAPI Business Capability Map
