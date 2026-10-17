@@ -71,6 +71,31 @@ components:
           title: Detail
       type: object
       title: HTTPValidationError
+    Body_support_submit_support_post:
+      properties:
+        email:
+          type: string
+          title: Email
+        subject:
+          type: string
+          title: Subject
+        message:
+          type: string
+          title: Message
+        category:
+          type: string
+          title: Category
+          default: general
+        hp_website:
+          type: string
+          title: Hp Website
+          default: ''
+      type: object
+      required:
+      - email
+      - subject
+      - message
+      title: Body_support_submit_support_post
     ValidationError:
       properties:
         loc:
@@ -97,31 +122,6 @@ components:
       - msg
       - type
       title: ValidationError
-    Body_support_submit_support_post:
-      properties:
-        email:
-          type: string
-          title: Email
-        subject:
-          type: string
-          title: Subject
-        message:
-          type: string
-          title: Message
-        category:
-          type: string
-          title: Category
-          default: general
-        hp_website:
-          type: string
-          title: Hp Website
-          default: ''
-      type: object
-      required:
-      - email
-      - subject
-      - message
-      title: Body_support_submit_support_post
   securitySchemes:
     apiKeyHeader:
       type: apiKey

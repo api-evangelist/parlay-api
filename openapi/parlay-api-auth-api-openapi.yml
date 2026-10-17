@@ -218,7 +218,7 @@ paths:
                 $ref: '#/components/schemas/HTTPValidationError'
 components:
   schemas:
-    Body_login_submit_login_post:
+    Body_signup_submit_signup_post:
       properties:
         email:
           type: string
@@ -229,12 +229,16 @@ components:
         next:
           type: string
           title: Next
-          default: /dashboard
+          default: ''
+        attribution:
+          type: string
+          title: Attribution
+          default: ''
       type: object
       required:
       - email
       - password
-      title: Body_login_submit_login_post
+      title: Body_signup_submit_signup_post
     ValidationError:
       properties:
         loc:
@@ -261,6 +265,32 @@ components:
       - msg
       - type
       title: ValidationError
+    Body_login_submit_login_post:
+      properties:
+        email:
+          type: string
+          title: Email
+        password:
+          type: string
+          title: Password
+        next:
+          type: string
+          title: Next
+          default: /dashboard
+      type: object
+      required:
+      - email
+      - password
+      title: Body_login_submit_login_post
+    HTTPValidationError:
+      properties:
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
+      type: object
+      title: HTTPValidationError
     Body_reset_password_submit_reset_password_post:
       properties:
         token:
@@ -274,36 +304,6 @@ components:
       - token
       - password
       title: Body_reset_password_submit_reset_password_post
-    Body_signup_submit_signup_post:
-      properties:
-        email:
-          type: string
-          title: Email
-        password:
-          type: string
-          title: Password
-        next:
-          type: string
-          title: Next
-          default: ''
-        attribution:
-          type: string
-          title: Attribution
-          default: ''
-      type: object
-      required:
-      - email
-      - password
-      title: Body_signup_submit_signup_post
-    HTTPValidationError:
-      properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
-      type: object
-      title: HTTPValidationError
     Body_forgot_password_submit_forgot_password_post:
       properties:
         email:
